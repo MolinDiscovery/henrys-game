@@ -1,0 +1,2611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Henry's Nickel Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e1a;
+    --panel: #0d1117;
+    --border: #1a2332;
+    --green: #00ff88;
+    --cyan: #00d4ff;
+    --magenta: #ff88ff;
+    --yellow: #ffdd44;
+    --red: #ff6b6b;
+    --text: #c8d0e0;
+    --dim: #667088;
+    --amber: #ffaa00;
+  }
+
+  html { overscroll-behavior: none; }
+  body {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', Consolas, Monaco, 'Courier New', monospace;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  #game-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 840px;
+    padding: 8px;
+  }
+
+  .hidden { display: none !important; }
+
+  /* ===== TITLE SCREEN ===== */
+  #title-screen {
+    text-align: center;
+    padding: 36px 32px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+
+  #title-screen h1 {
+    font-size: 2.4rem;
+    color: var(--green);
+    text-shadow: 0 0 24px rgba(0,255,136,0.25);
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    color: var(--cyan);
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .henry-avatar svg { display: block; }
+
+  .ni-tile {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    width: 84px;
+    height: 84px;
+    background: rgba(0,255,136,0.06);
+    border: 2px solid var(--green);
+    border-radius: 6px;
+    padding: 5px;
+    box-shadow: 0 0 20px rgba(0,255,136,0.12);
+  }
+  .ni-tile .num { font-size: 0.65rem; color: var(--green); align-self: flex-start; line-height: 1; }
+  .ni-tile .sym { font-size: 1.6rem; font-weight: bold; color: var(--green); line-height: 1.2; }
+  .ni-tile .nam { font-size: 0.6rem; color: rgba(0,255,136,0.7); }
+  .ni-tile .mas { font-size: 0.6rem; color: rgba(0,255,136,0.45); }
+
+  .starring {
+    font-size: 0.8rem;
+    color: var(--dim);
+    margin-bottom: 16px;
+  }
+  .starring b { color: var(--magenta); }
+
+  .instructions {
+    text-align: left;
+    max-width: 520px;
+    margin: 0 auto 18px;
+    padding: 18px 22px;
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 0.82rem;
+    line-height: 1.9;
+  }
+  .instructions h3 {
+    color: var(--cyan);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+  .instructions ul { list-style: none; }
+  .instructions li::before { content: '\25B8 '; color: var(--green); }
+  .instructions .ligand-demo {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 12px 36px;
+    background: var(--green);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    margin: 4px;
+  }
+  button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 24px rgba(0,255,136,0.35);
+  }
+  button:active { transform: translateY(0); }
+  button:disabled {
+    background: #2a3548;
+    color: #556070;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .title-highscore {
+    margin-top: 14px;
+    color: var(--dim);
+    font-size: 0.85rem;
+  }
+  .title-highscore span { color: var(--yellow); font-weight: bold; }
+
+  /* ===== GAME SCREEN ===== */
+  #game-screen {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #top-bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 18px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .stat { font-size: 0.82rem; color: var(--dim); white-space: nowrap; }
+  .stat b { color: var(--green); font-weight: bold; }
+  .stat.lives b { color: var(--red); }
+  .stat.hindex b { color: var(--magenta); }
+  .stat.ts b { color: var(--amber); }
+
+  #dft-btn {
+    margin-left: auto;
+    padding: 7px 18px;
+    font-size: 0.8rem;
+    background: var(--cyan);
+    color: var(--bg);
+    border-radius: 6px;
+  }
+  #dft-btn:hover { box-shadow: 0 0 20px rgba(0,212,255,0.35); }
+  #dft-btn:disabled { background: #2a3548; color: #556070; box-shadow: none; }
+
+  #canvas-container {
+    position: relative;
+    line-height: 0;
+  }
+  #game-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    cursor: crosshair;
+    background: var(--bg);
+    touch-action: none;
+  }
+
+  /* Henry overlay */
+  #henry-container {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  #henry-mini { line-height: 0; opacity: 0.85; }
+  #henry-quote {
+    background: var(--panel);
+    border: 1px solid var(--magenta);
+    border-radius: 14px 14px 14px 3px;
+    padding: 6px 12px;
+    font-size: 0.72rem;
+    color: var(--magenta);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.3s, transform 0.3s;
+    max-width: 200px;
+    line-height: 1.4;
+  }
+  #henry-quote.show { opacity: 1; transform: translateY(0); }
+
+  /* Pause overlay */
+  #pause-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,14,26,0.75);
+    z-index: 8;
+    font-size: 1.2rem;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  #pause-overlay.show { opacity: 1; }
+
+  /* ===== LIGAND BAR ===== */
+  #ligand-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .ligand-btn {
+    flex: 1;
+    min-width: 118px;
+    padding: 9px 8px 7px;
+    background: var(--panel);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    position: relative;
+    font-family: inherit;
+  }
+  .ligand-btn:hover { border-color: var(--ligand-color); transform: translateY(-1px); }
+  .ligand-btn.selected {
+    border-color: var(--ligand-color);
+    background: #141d2e;
+    outline: 2px solid var(--ligand-color);
+    outline-offset: 1px;
+  }
+  .ligand-key {
+    position: absolute;
+    top: 3px; left: 7px;
+    font-size: 0.62rem;
+    color: #445066;
+    background: var(--border);
+    padding: 0 5px;
+    border-radius: 3px;
+    line-height: 1.4;
+  }
+  .ligand-formula { font-size: 1.05rem; font-weight: bold; color: var(--ligand-color); margin-top: 4px; }
+  .ligand-name { font-size: 0.62rem; color: var(--dim); }
+  .ligand-pts { font-size: 0.65rem; color: var(--green); }
+
+  /* ===== GAME OVER ===== */
+  #game-over-screen {
+    text-align: center;
+    padding: 36px 32px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  #game-over-screen h2 {
+    font-size: 2rem;
+    color: var(--red);
+    text-shadow: 0 0 20px rgba(255,107,107,0.25);
+    margin-bottom: 6px;
+  }
+  #game-over-screen .henry-reaction { font-size: 0.85rem; color: var(--dim); margin-bottom: 20px; }
+
+  #final-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 420px;
+    margin: 0 auto 22px;
+  }
+  .stat-box {
+    padding: 14px;
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .stat-box .label { font-size: 0.68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-box .value { font-size: 1.5rem; color: var(--green); font-weight: bold; margin-top: 2px; }
+  .stat-box.highlight .value { color: var(--yellow); }
+
+  .new-record {
+    color: var(--yellow);
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    animation: pulse-glow 1s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 8px rgba(255,221,68,0.3); }
+    50% { text-shadow: 0 0 20px rgba(255,221,68,0.7); }
+  }
+
+  /* ===== DFT OVERLAY ===== */
+  #dft-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--panel);
+    border: 1px solid var(--cyan);
+    border-radius: 14px;
+    padding: 28px 36px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(0,212,255,0.2);
+    z-index: 10;
+    min-width: 280px;
+  }
+  .dft-title { color: var(--cyan); font-weight: bold; font-size: 0.95rem; margin-bottom: 14px; }
+  .dft-progress {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  #dft-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    border-radius: 4px;
+  }
+  #dft-text { color: var(--dim); font-size: 0.75rem; min-height: 1.2em; }
+
+  /* ===== ACHIEVEMENT TOAST ===== */
+  #achievement-toast {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--panel);
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 0 24px rgba(0,255,136,0.2);
+    z-index: 20;
+    opacity: 0;
+    transform: translateX(24px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    max-width: 280px;
+  }
+  #achievement-toast.show { opacity: 1; transform: translateX(0); }
+  #achievement-icon { font-size: 1.4rem; color: var(--yellow); }
+  #achievement-text { font-size: 0.75rem; line-height: 1.4; }
+  #achievement-text strong { color: var(--green); display: block; font-size: 0.82rem; }
+  #achievement-text small { color: var(--dim); }
+
+  /* ===== MODALS ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 15, 0.88);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    padding: 16px;
+  }
+  .modal-overlay.hidden { display: none; }
+
+  .modal-content {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 85vh;
+    max-height: 85dvh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 32px; height: 32px;
+    padding: 0;
+    background: var(--border);
+    color: var(--dim);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover {
+    background: var(--red);
+    color: #fff;
+    box-shadow: none;
+    transform: none;
+  }
+  .modal-content h2 {
+    color: var(--cyan);
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+    padding-right: 36px;
+  }
+
+  /* Leaderboard */
+  .lb-list { display: flex; flex-direction: column; gap: 6px; }
+  .lb-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .lb-entry.gold { border-color: var(--yellow); }
+  .lb-entry.silver { border-color: #8899aa; }
+  .lb-entry.bronze { border-color: #aa7744; }
+  .lb-rank {
+    font-size: 0.95rem;
+    font-weight: bold;
+    width: 36px;
+    text-align: center;
+    color: var(--dim);
+    flex-shrink: 0;
+  }
+  .lb-entry.gold .lb-rank { color: var(--yellow); }
+  .lb-entry.silver .lb-rank { color: #8899aa; }
+  .lb-entry.bronze .lb-rank { color: #aa7744; }
+  .lb-name {
+    flex: 1;
+    font-weight: bold;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .lb-meta {
+    font-size: 0.68rem;
+    color: var(--dim);
+    flex-shrink: 0;
+  }
+  .lb-score {
+    color: var(--green);
+    font-weight: bold;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+  .lb-empty {
+    text-align: center;
+    color: var(--dim);
+    padding: 30px;
+    font-size: 0.85rem;
+  }
+  .lb-status {
+    font-size: 0.68rem;
+    color: var(--dim);
+    margin-bottom: 10px;
+    min-height: 1em;
+  }
+
+  /* Import score */
+  .lb-import {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .lb-import-label {
+    font-size: 0.72rem;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+  .lb-import-row { display: flex; gap: 6px; }
+  .lb-import-row input {
+    flex: 1;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    outline: none;
+    min-width: 0;
+  }
+  .lb-import-row input:focus { border-color: var(--cyan); }
+  .lb-import-row button {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    background: var(--panel);
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+    border-radius: 6px;
+    white-space: nowrap;
+    margin: 0;
+  }
+  .lb-import-row button:hover {
+    background: var(--cyan);
+    color: var(--bg);
+    box-shadow: 0 0 12px rgba(0,212,255,0.3);
+  }
+  .lb-import-msg { font-size: 0.68rem; margin-top: 6px; min-height: 1em; }
+  .lb-import-msg.ok { color: var(--green); }
+  .lb-import-msg.err { color: var(--red); }
+
+  /* Share score */
+  .share-row { display: flex; gap: 6px; margin-top: 14px; }
+  .share-row input {
+    flex: 1;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 0.68rem;
+    background: var(--bg);
+    color: var(--dim);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    outline: none;
+    min-width: 0;
+  }
+  .share-row button {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    background: var(--panel);
+    color: var(--green);
+    border: 1px solid var(--green);
+    border-radius: 6px;
+    white-space: nowrap;
+    margin: 0;
+  }
+  .share-row button:hover {
+    background: var(--green);
+    color: var(--bg);
+    box-shadow: 0 0 12px rgba(0,255,136,0.3);
+  }
+  .share-hint {
+    font-size: 0.65rem;
+    color: var(--dim);
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  /* Achievements board */
+  .ach-progress-wrap { margin-bottom: 16px; }
+  .ach-progress-label {
+    font-size: 0.72rem;
+    color: var(--dim);
+    margin-bottom: 6px;
+    text-align: right;
+  }
+  .ach-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .ach-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    border-radius: 3px;
+    transition: width 0.4s;
+  }
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .ach-card {
+    padding: 14px 10px;
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    text-align: center;
+    opacity: 0.4;
+  }
+  .ach-card.unlocked {
+    opacity: 1;
+    border-color: var(--green);
+    box-shadow: 0 0 12px rgba(0,255,136,0.08);
+  }
+  .ach-card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+    color: var(--dim);
+  }
+  .ach-card.unlocked .ach-card-icon { color: var(--yellow); }
+  .ach-card-name {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--dim);
+    margin-bottom: 3px;
+  }
+  .ach-card.unlocked .ach-card-name { color: var(--green); }
+  .ach-card-desc {
+    font-size: 0.62rem;
+    color: var(--dim);
+    line-height: 1.4;
+  }
+  .ach-card-date {
+    font-size: 0.55rem;
+    color: var(--cyan);
+    margin-top: 5px;
+  }
+
+  /* Name input modal */
+  #name-input-modal .modal-content {
+    max-width: 380px;
+    text-align: center;
+  }
+  #name-input-modal h2 {
+    color: var(--yellow);
+    padding-right: 0;
+  }
+  .name-input-score {
+    font-size: 1.6rem;
+    color: var(--green);
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .name-input-sub {
+    font-size: 0.72rem;
+    color: var(--dim);
+    margin-bottom: 16px;
+  }
+  #player-name {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 12px;
+    outline: none;
+  }
+  #player-name:focus { border-color: var(--green); }
+  .name-input-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .name-input-buttons button { margin: 0; }
+  .name-input-buttons button.secondary {
+    background: var(--panel);
+    color: var(--dim);
+    border: 1px solid var(--border);
+    box-shadow: none;
+  }
+  .name-input-buttons button.secondary:hover {
+    color: var(--text);
+    border-color: var(--dim);
+    box-shadow: none;
+  }
+
+  /* Title / game-over secondary buttons */
+  .title-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .title-buttons button {
+    padding: 8px 20px;
+    font-size: 0.8rem;
+    background: var(--panel);
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+    margin: 0;
+  }
+  .title-buttons button:hover {
+    background: var(--cyan);
+    color: var(--bg);
+    box-shadow: 0 0 16px rgba(0,212,255,0.3);
+  }
+  .title-buttons button.ach-btn {
+    color: var(--yellow);
+    border-color: var(--yellow);
+  }
+  .title-buttons button.ach-btn:hover {
+    background: var(--yellow);
+    color: var(--bg);
+    box-shadow: 0 0 16px rgba(255,221,68,0.3);
+  }
+
+  /* ===== FOOTER ===== */
+  #footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.7rem;
+    color: #334155;
+  }
+  #footer b { color: #445870; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 880px) {
+    #game-wrapper { padding: 4px; }
+    #title-screen { padding: 24px 16px; }
+    #title-screen h1 { font-size: 1.8rem; }
+    .subtitle { font-size: 0.85rem; }
+    .title-row { gap: 16px; }
+    .henry-avatar svg { width: 80px; height: 87px; }
+    .ni-tile { width: 72px; height: 72px; }
+    .ni-tile .sym { font-size: 1.3rem; }
+    .instructions { font-size: 0.75rem; padding: 14px 16px; line-height: 1.7; }
+    #top-bar { gap: 8px 14px; padding: 8px 12px; }
+    .stat { font-size: 0.72rem; }
+    #dft-btn { padding: 5px 14px; font-size: 0.72rem; }
+    #ligand-bar { padding: 8px; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    #ligand-bar::-webkit-scrollbar { display: none; }
+    .ligand-btn { min-width: 95px; padding: 7px 6px 5px; }
+    .ligand-formula { font-size: 0.95rem; }
+    .ligand-name { font-size: 0.58rem; }
+    .ligand-pts { font-size: 0.6rem; }
+    #henry-mini svg { width: 36px; height: 39px; }
+    #henry-quote { font-size: 0.65rem; max-width: 160px; }
+    #dft-overlay { padding: 22px 28px; min-width: 250px; max-width: 90vw; }
+    #achievement-toast { top: 10px; right: 10px; max-width: 240px; }
+    #game-over-screen { padding: 28px 16px; }
+    #final-stats { gap: 10px; }
+    .stat-box { padding: 12px; }
+    .stat-box .value { font-size: 1.3rem; }
+    button { padding: 10px 28px; font-size: 0.9rem; }
+  }
+
+  @media (max-width: 600px) {
+    #title-screen { padding: 16px 10px; max-height: 100dvh; overflow-y: auto; }
+    #title-screen h1 { font-size: 1.4rem; }
+    .subtitle { font-size: 0.75rem; margin-bottom: 12px; }
+    .title-row { gap: 10px; margin-bottom: 10px; }
+    .henry-avatar svg { width: 60px; height: 65px; }
+    .ni-tile { width: 56px; height: 56px; padding: 3px; }
+    .ni-tile .num { font-size: 0.55rem; }
+    .ni-tile .sym { font-size: 1.1rem; }
+    .ni-tile .nam { font-size: 0.5rem; }
+    .ni-tile .mas { font-size: 0.5rem; }
+    .starring { font-size: 0.7rem; margin-bottom: 10px; }
+    .instructions { font-size: 0.68rem; padding: 10px 12px; line-height: 1.6; margin-bottom: 12px; }
+    .instructions h3 { font-size: 0.78rem; }
+    .instructions .ligand-demo { width: 8px; height: 8px; }
+    button { padding: 9px 22px; font-size: 0.82rem; }
+    .title-highscore { font-size: 0.75rem; margin-top: 10px; }
+    #top-bar { gap: 6px 10px; padding: 6px 8px; }
+    .stat { font-size: 0.65rem; }
+    #dft-btn { padding: 4px 10px; font-size: 0.65rem; }
+    #ligand-bar { padding: 6px 4px; gap: 4px; }
+    .ligand-btn { min-width: 78px; padding: 5px 3px 4px; border-radius: 7px; }
+    .ligand-key { font-size: 0.52rem; top: 2px; left: 5px; padding: 0 4px; }
+    .ligand-formula { font-size: 0.82rem; margin-top: 3px; }
+    .ligand-name { font-size: 0.52rem; }
+    .ligand-pts { font-size: 0.55rem; }
+    #henry-container { bottom: 4px; left: 4px; gap: 4px; }
+    #henry-mini svg { width: 28px; height: 30px; }
+    #henry-quote { font-size: 0.58rem; max-width: 130px; padding: 4px 8px; }
+    #pause-overlay { font-size: 0.9rem; }
+    #dft-overlay { padding: 16px 20px; min-width: 220px; }
+    .dft-title { font-size: 0.82rem; margin-bottom: 10px; }
+    #achievement-toast { top: 6px; right: 6px; max-width: 190px; padding: 7px 10px; gap: 8px; }
+    #achievement-icon { font-size: 1rem; }
+    #achievement-text { font-size: 0.62rem; }
+    #achievement-text strong { font-size: 0.68rem; }
+    #game-over-screen { padding: 20px 10px; max-height: 100dvh; overflow-y: auto; }
+    #game-over-screen h2 { font-size: 1.3rem; }
+    #game-over-screen .henry-reaction { font-size: 0.72rem; margin-bottom: 14px; }
+    #final-stats { gap: 6px; margin-bottom: 16px; }
+    .stat-box { padding: 8px; border-radius: 8px; }
+    .stat-box .label { font-size: 0.55rem; }
+    .stat-box .value { font-size: 1.1rem; }
+    #footer { font-size: 0.6rem; padding: 6px; }
+  }
+
+  @media (max-width: 400px) {
+    #title-screen h1 { font-size: 1.15rem; }
+    .instructions { font-size: 0.62rem; padding: 8px 10px; }
+    .stat { font-size: 0.58rem; }
+    #dft-btn { padding: 3px 8px; font-size: 0.58rem; }
+    .ligand-btn { min-width: 68px; }
+    .ligand-formula { font-size: 0.72rem; }
+    .ligand-name { display: none; }
+    .ligand-pts { font-size: 0.5rem; }
+    #henry-mini { display: none; }
+    #henry-quote { max-width: 110px; font-size: 0.55rem; }
+    #achievement-toast { max-width: 160px; }
+    .stat-box .value { font-size: 0.95rem; }
+    button { padding: 8px 18px; font-size: 0.75rem; }
+  }
+
+  /* Landscape phones */
+  @media (max-height: 500px) and (orientation: landscape) {
+    body { align-items: flex-start; padding-top: 2px; }
+    #game-wrapper { padding: 2px; }
+    #title-screen { padding: 10px; max-height: 100dvh; overflow-y: auto; }
+    #title-screen h1 { font-size: 1.1rem; margin-bottom: 2px; }
+    .subtitle { font-size: 0.65rem; margin-bottom: 6px; }
+    .title-row { gap: 8px; margin-bottom: 6px; }
+    .henry-avatar svg { width: 44px; height: 48px; }
+    .ni-tile { width: 44px; height: 44px; padding: 2px; }
+    .ni-tile .sym { font-size: 0.9rem; }
+    .starring { font-size: 0.6rem; margin-bottom: 6px; }
+    .instructions { font-size: 0.58rem; padding: 6px 8px; line-height: 1.4; margin-bottom: 6px; }
+    .instructions h3 { font-size: 0.65rem; margin-bottom: 3px; }
+    button { padding: 5px 14px; font-size: 0.68rem; }
+    .title-highscore { font-size: 0.62rem; margin-top: 6px; }
+    #top-bar { padding: 3px 6px; gap: 4px 8px; }
+    .stat { font-size: 0.58rem; }
+    #dft-btn { padding: 2px 8px; font-size: 0.58rem; }
+    #ligand-bar { padding: 3px 4px; gap: 3px; }
+    .ligand-btn { min-width: 62px; padding: 3px 2px 2px; border-radius: 5px; }
+    .ligand-key { font-size: 0.45rem; top: 1px; left: 3px; padding: 0 3px; }
+    .ligand-formula { font-size: 0.68rem; margin-top: 2px; }
+    .ligand-name { display: none; }
+    .ligand-pts { font-size: 0.48rem; }
+    #henry-container { bottom: 2px; left: 2px; gap: 2px; }
+    #henry-mini svg { width: 20px; height: 22px; }
+    #henry-quote { font-size: 0.5rem; max-width: 90px; padding: 2px 5px; }
+    #pause-overlay { font-size: 0.75rem; }
+    #dft-overlay { padding: 10px 16px; min-width: 180px; }
+    .dft-title { font-size: 0.7rem; margin-bottom: 6px; }
+    #dft-text { font-size: 0.6rem; }
+    #achievement-toast { top: 3px; right: 3px; max-width: 140px; padding: 3px 6px; gap: 5px; }
+    #achievement-icon { font-size: 0.85rem; }
+    #achievement-text { font-size: 0.52rem; }
+    #achievement-text strong { font-size: 0.58rem; }
+    #game-over-screen { padding: 12px 8px; max-height: 100dvh; overflow-y: auto; }
+    #game-over-screen h2 { font-size: 1rem; margin-bottom: 3px; }
+    #game-over-screen .henry-reaction { font-size: 0.6rem; margin-bottom: 8px; }
+    #final-stats { gap: 4px; margin-bottom: 10px; }
+    .stat-box { padding: 5px; border-radius: 6px; }
+    .stat-box .label { font-size: 0.48rem; }
+    .stat-box .value { font-size: 0.85rem; }
+    #footer { font-size: 0.5rem; padding: 3px; }
+  }
+</style>
+</head>
+<body>
+<div id="game-wrapper">
+
+  <!-- ===== TITLE SCREEN ===== -->
+  <div id="title-screen">
+    <h1>Henry's Nickel Quest</h1>
+    <p class="subtitle">A Computational Chemistry Adventure</p>
+
+    <div class="title-row">
+      <div class="henry-avatar">
+        <svg viewBox="0 0 120 130" width="96" height="104" aria-label="Henry">
+          <path d="M 35 78 L 60 94 L 85 78 L 92 130 L 28 130 Z" fill="#e8ecf2" stroke="#b0b8c8" stroke-width="1.5"/>
+          <path d="M 50 78 L 60 94 L 70 78 L 70 88 L 50 88 Z" fill="#00d4ff" opacity="0.25"/>
+          <rect x="54" y="68" width="12" height="12" fill="#f0c090"/>
+          <circle cx="60" cy="48" r="28" fill="#f0c090" stroke="#c89060" stroke-width="1.5"/>
+          <path d="M 32 45 Q 35 20 60 18 Q 85 20 88 45 Q 85 30 60 28 Q 35 30 32 45" fill="#4a3525"/>
+          <circle cx="32" cy="51" r="5" fill="#f0c090" stroke="#c89060" stroke-width="1"/>
+          <circle cx="88" cy="51" r="5" fill="#f0c090" stroke="#c89060" stroke-width="1"/>
+          <circle cx="48" cy="48" r="10" fill="rgba(0,212,255,0.08)" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="72" cy="48" r="10" fill="rgba(0,212,255,0.08)" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="58" y1="48" x2="62" y2="48" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="38" y1="48" x2="32" y2="46" stroke="#2a2a2a" stroke-width="2"/>
+          <line x1="82" y1="48" x2="88" y2="46" stroke="#2a2a2a" stroke-width="2"/>
+          <circle cx="48" cy="48" r="3" fill="#2a2a2a"/>
+          <circle cx="72" cy="48" r="3" fill="#2a2a2a"/>
+          <line x1="42" y1="39" x2="54" y2="39" stroke="#4a3525" stroke-width="2" stroke-linecap="round"/>
+          <line x1="66" y1="39" x2="78" y2="39" stroke="#4a3525" stroke-width="2" stroke-linecap="round"/>
+          <path d="M 60 51 L 58 57 L 62 57" fill="none" stroke="#c89060" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M 48 61 Q 60 69 72 61" fill="none" stroke="#2a2a2a" stroke-width="2" stroke-linecap="round"/>
+          <path d="M 85 84 Q 96 88 97 94" fill="none" stroke="#e8ecf2" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="98" cy="100" r="15" fill="#00ff88" opacity="0.18"/>
+          <circle cx="98" cy="100" r="9" fill="#00ff88"/>
+          <text x="98" y="104" font-size="8" text-anchor="middle" fill="#003311" font-weight="bold" font-family="monospace">Ni</text>
+        </svg>
+      </div>
+      <div class="ni-tile">
+        <span class="num">28</span>
+        <span class="sym">Ni</span>
+        <span class="nam">Nickel</span>
+        <span class="mas">58.693</span>
+      </div>
+    </div>
+
+    <p class="starring">Starring <b>Henry</b> &mdash; Computational Chemist &amp; Nickel Enthusiast</p>
+
+    <div class="instructions">
+      <h3>How to Play</h3>
+      <ul>
+        <li><b>Ni&sup2;&plus; ions</b> fall from the top of the simulation box. Catch them!</li>
+        <li><b>Select a ligand</b> (click or press <b>1&ndash;5</b>), then <b>click a Ni&sup2;&plus;</b> to coordinate it.</li>
+        <li>Each Ni&sup2;&plus; needs <b>6 ligands</b> to form a stable octahedral complex.</li>
+        <li><b>HSAB matching:</b> match hard Ni&sup2;&plus; with hard bases (H&#8322;O, Cl&#8315;), soft Ni&sup2;&plus; with soft bases (CN&#8315;, en) for bonuses.</li>
+        <li><b>Strong-field ligands</b> (CN&#8315;, en) give CFSE bonuses. <b>Homoleptic</b> complexes (all same ligand) earn big bonuses.</li>
+        <li>Don't let Ni&sup2;&plus; reach the bottom &mdash; you lose research grants (lives)!</li>
+        <li><b>Transition states (&Dagger;)</b> appear occasionally &mdash; click them rapidly to optimize the saddle point before they decompose. Big rewards!</li>
+        <li>Press <b>P</b> to pause. Click <b>Run DFT</b> for a computational chemistry power-up.</li>
+      </ul>
+      <p style="margin-top:10px; color:var(--dim); font-size:0.75rem;">
+        Ligands:
+        <span class="ligand-demo" style="background:#4FC3F7"></span>H&#8322;O (hard, weak field)
+        <span class="ligand-demo" style="background:#81C784"></span>NH&#8323; (borderline)
+        <span class="ligand-demo" style="background:#FFD54F"></span>Cl&#8315; (hard, weak field)
+        <span class="ligand-demo" style="background:#BA68C8"></span>en (soft, strong field)
+        <span class="ligand-demo" style="background:#E57373"></span>CN&#8315; (soft, strong field)
+      </p>
+    </div>
+
+    <button id="start-btn">Start Experiment</button>
+    <p class="title-highscore">High Score: <span id="title-high-score">0</span></p>
+    <div class="title-buttons">
+      <button id="title-lb-btn" type="button">Leaderboard</button>
+      <button id="title-ach-btn" type="button" class="ach-btn">Achievements</button>
+      <button id="title-player-btn" type="button">Choose player name</button>
+    </div>
+  </div>
+
+  <!-- ===== GAME SCREEN ===== -->
+  <div id="game-screen" class="hidden">
+    <div id="top-bar">
+      <span class="stat">Score: <b id="score">0</b></span>
+      <span class="stat">Level: <b id="level">1</b></span>
+      <span class="stat lives">Grants: <b id="lives">3</b></span>
+      <span class="stat hindex">h-index: <b id="h-index">0</b></span>
+      <span class="stat ts">TS: <b id="ts-count">0</b></span>
+      <button id="dft-btn">Run DFT</button>
+    </div>
+
+    <div id="canvas-container">
+      <canvas id="game-canvas" width="800" height="500"></canvas>
+
+      <div id="henry-container">
+        <div id="henry-mini">
+          <svg viewBox="0 0 120 130" width="44" height="48" aria-label="Henry">
+            <path d="M 35 78 L 60 94 L 85 78 L 92 130 L 28 130 Z" fill="#e8ecf2" stroke="#b0b8c8" stroke-width="2"/>
+            <rect x="54" y="68" width="12" height="12" fill="#f0c090"/>
+            <circle cx="60" cy="48" r="28" fill="#f0c090" stroke="#c89060" stroke-width="2"/>
+            <path d="M 32 45 Q 35 20 60 18 Q 85 20 88 45 Q 85 30 60 28 Q 35 30 32 45" fill="#4a3525"/>
+            <circle cx="48" cy="48" r="10" fill="rgba(0,212,255,0.08)" stroke="#2a2a2a" stroke-width="2.5"/>
+            <circle cx="72" cy="48" r="10" fill="rgba(0,212,255,0.08)" stroke="#2a2a2a" stroke-width="2.5"/>
+            <line x1="58" y1="48" x2="62" y2="48" stroke="#2a2a2a" stroke-width="2.5"/>
+            <circle cx="48" cy="48" r="3" fill="#2a2a2a"/>
+            <circle cx="72" cy="48" r="3" fill="#2a2a2a"/>
+            <path d="M 48 61 Q 60 69 72 61" fill="none" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="98" cy="100" r="15" fill="#00ff88" opacity="0.18"/>
+            <circle cx="98" cy="100" r="9" fill="#00ff88"/>
+            <text x="98" y="104" font-size="8" text-anchor="middle" fill="#003311" font-weight="bold" font-family="monospace">Ni</text>
+          </svg>
+        </div>
+        <div id="henry-quote"></div>
+      </div>
+
+      <div id="pause-overlay">PAUSED &mdash; press P to resume</div>
+    </div>
+
+    <div id="ligand-bar"></div>
+  </div>
+
+  <!-- ===== GAME OVER SCREEN ===== -->
+  <div id="game-over-screen" class="hidden">
+    <h2>Simulation Terminated</h2>
+    <p class="henry-reaction" id="henry-reaction"></p>
+    <div id="new-record-banner"></div>
+    <div id="final-stats">
+      <div class="stat-box"><div class="label">Final Score</div><div class="value" id="final-score">0</div></div>
+      <div class="stat-box"><div class="label">Level Reached</div><div class="value" id="final-level">1</div></div>
+      <div class="stat-box"><div class="label">Complexes Formed</div><div class="value" id="final-complexes">0</div></div>
+      <div class="stat-box"><div class="label">h-index</div><div class="value" id="final-hindex">0</div></div>
+      <div class="stat-box"><div class="label">TS Stabilized</div><div class="value" id="final-ts" style="color:var(--amber)">0</div></div>
+      <div class="stat-box"><div class="label">DFT Runs</div><div class="value" id="final-dft" style="color:var(--cyan)">0</div></div>
+      <div class="stat-box highlight" style="grid-column: span 2;"><div class="label">High Score</div><div class="value" id="final-highscore">0</div></div>
+    </div>
+    <button id="restart-btn">Run Again</button>
+    <div class="title-buttons">
+      <div id="gameover-sync" class="lb-status" role="status"></div>
+      <button id="gameover-lb-btn" type="button">Leaderboard</button>
+    </div>
+  </div>
+
+  <!-- ===== DFT OVERLAY ===== -->
+  <div id="dft-overlay" class="hidden">
+    <div class="dft-title">DFT Calculation</div>
+    <div class="dft-progress"><div id="dft-bar"></div></div>
+    <p id="dft-text">Initializing basis set...</p>
+  </div>
+
+  <!-- ===== ACHIEVEMENT TOAST ===== -->
+  <div id="achievement-toast" class="hidden">
+    <span id="achievement-icon"></span>
+    <span id="achievement-text"></span>
+  </div>
+
+  <!-- ===== LEADERBOARD MODAL ===== -->
+  <div id="leaderboard-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <button class="modal-close" type="button" aria-label="Close">&times;</button>
+      <h2>Leaderboard</h2>
+      <div class="lb-status" id="lb-status"></div>
+      <div class="lb-list" id="lb-list"></div>
+      <div class="lb-empty hidden" id="lb-empty">No scores yet &mdash; be the first!</div>
+      <div class="share-row">
+        <input id="share-url" type="text" readonly>
+        <button id="share-copy-btn" type="button">Copy</button>
+      </div>
+      <div class="share-hint">Share the game &mdash; everyone sees the same online boards</div>
+    </div>
+  </div>
+
+  <!-- ===== ACHIEVEMENTS MODAL ===== -->
+  <div id="achievements-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <button class="modal-close" type="button" aria-label="Close">&times;</button>
+      <h2>Achievements</h2>
+      <div class="lb-status" id="ach-status"></div>
+      <div id="ach-players" class="lb-list"></div>
+      <div class="ach-progress-wrap">
+        <div class="ach-progress-label" id="ach-progress-label">0 / 0 unlocked</div>
+        <div class="ach-progress-bar"><div class="ach-progress-fill" id="ach-progress-fill"></div></div>
+      </div>
+      <div class="achievements-grid" id="achievements-grid"></div>
+    </div>
+  </div>
+
+  <!-- ===== NAME INPUT MODAL ===== -->
+  <div id="name-input-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Your player">
+    <div class="modal-content">
+      <h2>Your Player</h2>
+      <div class="name-input-score" id="name-input-score">0</div>
+      <div class="name-input-sub">Choose a name (2–12 characters). This browser remembers you.</div>
+      <input id="player-name" aria-label="Player name" type="text" maxlength="12" placeholder="Your name" autocomplete="off">
+      <div class="name-input-buttons">
+        <button id="name-submit-btn" type="button">Continue</button>
+        <button id="name-skip-btn" type="button" class="secondary">Play offline</button>
+      </div>
+      <div class="lb-import-msg" id="name-input-msg"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="footer">Made for <b>Henry</b> &middot; Computational Chemistry Edition &middot; Ni <b>28</b></div>
+
+<script>
+(function() {
+'use strict';
+
+/* ============================================================
+   CONSTANTS
+============================================================ */
+var CANVAS_W = 800;
+var CANVAS_H = 500;
+var MAX_LIGANDS = 6;
+var DANGER_ZONE = 100; // bottom pixels considered "danger"
+var TS_COLOR = '#ffaa00';
+var TS_CLICK_PROGRESS = 25; // % per click (4 clicks to stabilize)
+var TS_FALL_MULT = 1.6;
+var TS_BASE_POINTS = 500;
+var TS_MISS_PENALTY = 100;
+var TS_SPAWN_FIRST = 12000;
+var TS_SPAWN_MIN = 18000;
+var TS_SPAWN_MAX = 28000;
+
+var LIGANDS = [
+  { id: 'h2o', formula: 'H\u2082O', name: 'Water \u00b7 hard base',   color: '#4FC3F7', points: 10, key: '1', hardness: 'hard'       },
+  { id: 'nh3', formula: 'NH\u2083',  name: 'Ammonia \u00b7 borderline', color: '#81C784', points: 15, key: '2', hardness: 'borderline' },
+  { id: 'cl',  formula: 'Cl\u207B',  name: 'Chloride \u00b7 hard base',  color: '#FFD54F', points: 10, key: '3', hardness: 'hard'       },
+  { id: 'en',  formula: 'en',        name: 'Ethylenediamine \u00b7 soft', color: '#BA68C8', points: 25, key: '4', hardness: 'soft'    },
+  { id: 'cn',  formula: 'CN\u207B',  name: 'Cyanide \u00b7 soft base',   color: '#E57373', points: 40, key: '5', hardness: 'soft'       }
+];
+
+var NI_TYPE_COLORS = { hard: '#00ff88', soft: '#ff88ff', borderline: '#ffdd44' };
+var NI_TYPE_NAMES  = { hard: 'HARD', soft: 'SOFT', borderline: 'BORDERLINE' };
+
+// HSAB matching: which ligand ids match which Ni type
+var HSAB_MATCH = {
+  hard:       ['h2o', 'cl'],
+  soft:       ['cn', 'en'],
+  borderline: ['nh3']
+};
+
+var ACHIEVEMENTS = [
+  { id: 'first_complex',   icon: '\u25C6', name: 'Geometry Optimized',    desc: 'Complete your first nickel complex' },
+  { id: 'ten_complexes',   icon: '\u25CF', name: 'SCF Converged',         desc: 'Complete 10 complexes' },
+  { id: 'homoleptic',      icon: '\u25B2', name: 'Homoleptic Hero',       desc: 'Form a complex with 6 identical ligands' },
+  { id: 'low_spin',        icon: '\u25A0', name: 'Low Spin Champion',     desc: 'Homoleptic complex with strong-field ligands only' },
+  { id: 'high_spin',       icon: '\u2605', name: 'High Spin Master',      desc: 'Homoleptic complex with weak-field ligands only' },
+  { id: 'chelate',         icon: '\u2665', name: 'Chelate Effect',        desc: 'Use ethylenediamine (en) in a complex' },
+  { id: 'level_5',         icon: '\u2726', name: 'Crystal Field Master',  desc: 'Reach level 5' },
+  { id: 'dft_10',          icon: '\u25C8', name: 'DFT Wizard',            desc: 'Run 10 DFT calculations' },
+  { id: 'hindex_10',       icon: '\u25CE', name: 'h-index 10',            desc: 'Reach an h-index of 10' },
+  { id: 'fifty_complexes', icon: '\u2727', name: 'Nickel Nobel',          desc: 'Complete 50 complexes' },
+  { id: 'ts_first', icon: '\u2021', name: 'Saddle Point Found', desc: 'Stabilize your first transition state' },
+  { id: 'ts_five',  icon: '\u25C9', name: 'Reaction Pathway Mapped', desc: 'Stabilize 5 transition states' },
+  { id: 'ts_ten',   icon: '\u273A', name: 'TS Expert', desc: 'Stabilize 10 transition states' }
+];
+
+var HENRY_QUOTES = [
+  'Ni-ice complex!',
+  'That\u2019s a Nobel-worthy structure!',
+  'Crystal field theory, baby!',
+  'd\u2078 configuration, let\u2019s go!',
+  'Octahedral geometry is my favorite!',
+  'Ligand field splitting intensifies!',
+  'Computational chemistry: because experiments are too easy.',
+  'Nickel: it\u2019s not just for batteries!',
+  'Spin state? I prefer low spin.',
+  'My calculations say you\u2019re doing great.',
+  'Geometry optimization complete!',
+  'SCF converged in 5 cycles!',
+  'That\u2019s a beautiful MO diagram.',
+  '\u03C0-backbonding is fascinating.',
+  'Jahn-Teller distortion? Not on my watch.',
+  'HSAB theory for the win!',
+  'CFSE bonus! Nice ligand choice.',
+  'I ran this exact system last week.',
+  'd-orbital splitting is so satisfying.',
+  'Tetrahedral? Please. Octahedral all the way.',
+  'One imaginary frequency!',
+  'Saddle point located!',
+  'Following the reaction coordinate!',
+  'Berny algorithm, activate!',
+  'Don\u2019t let it decompose!',
+  'Imaginary frequency confirmed!',
+  'The reaction pathway awaits!',
+  'My PhD advisor said I\u2019d never use group theory. Look at me now.',
+  'I don\u2019t always run DFT, but when I do, I use a double-zeta basis set.',
+  'Schr\u00F6dinger\u2019s cat has nothing on my convergence issues.',
+  'I told my computer to think outside the box. It suggested a bigger unit cell.',
+  'Why did the nickel ion go to therapy? Too many unpaired electrons.',
+  'DFT: Definitely Faster Than experiments.',
+  'My favorite element? Ni. My second favorite? Also Ni.',
+  'Computational chemistry: 10% science, 90% waiting for the job to finish.',
+  'I don\u2019t trust atoms. They make up everything. Including my complexes.',
+  'Why don\u2019t chemists trust computers? Because they byte.',
+  'I\u2019m reading a book on anti-gravity. Impossible to put down. Unlike my SCF.',
+  'Parallel computing: because one core is never enough.',
+  'I told a joke about noble gases. No reaction.',
+  'Why did the chemist bring a ladder to the lab? To reach the high-spin states!',
+  'I\u2019m on a seafood diet. I see a calculation, I run it.',
+  'My love for nickel is... elemental.',
+  'What\u2019s a computational chemist\u2019s favorite music? Heavy metal. Lots of it.',
+  'My relationship status? It\u2019s complicated. Like my wavefunction.',
+  'I tried to write a song about nickel. It didn\u2019t resonate.',
+  'My superpower? Staring at a progress bar for hours and calling it work.',
+  'What do you call a nickel complex that tells jokes? A pun-gent.',
+  'My code is like my coffee: strong, bitter, and occasionally segfaults.',
+  'I\u2019m not a regular chemist, I\u2019m a cool chemist. 298 Kelvin.',
+  'I don\u2019t make mistakes. I make "unexpected features".',
+  'What\u2019s a computational chemist\u2019s favorite game? "Guess the spin state!"'
+];
+
+var HENRY_GAMEOVER_LINES = [
+  'Henry: "Even the best simulations diverge sometimes."',
+  'Henry: "Negative result? That\u2019s still a result. Publish it."',
+  'Henry: "Your wavefunction collapsed. Try a better basis set."',
+  'Henry: "I\u2019ve had calculations run out of memory too. Keep going."',
+  'Henry: "A failed run is just a geometry that needs optimizing."',
+  'Henry: "Even Schr\u00F6dinger would be confused by that run."',
+  'Henry: "I\u2019ve seen worse. Okay, I haven\u2019t. But I\u2019ve read about worse."',
+  'Henry: "Don\u2019t worry, I\u2019ve got 47 other jobs queued up."',
+  'Henry: "The good news: you found the global minimum. The bad news: it was game over."',
+  'Henry: "I told you not to use a minimal basis set."'
+];
+
+/* ============================================================
+   STATE
+============================================================ */
+var state = 'title'; // title | playing | gameover
+var paused = false;
+var score = 0, level = 1, lives = 3, complexesCompleted = 0, hIndex = 0;
+var niIons = [], particles = [], floatingTexts = [], bgDots = [];
+var selectedLigand = 0;
+var spawnTimer = 0, spawnInterval = 3000, fallSpeed = 1.0;
+var lastTime = 0;
+var dftCooldown = 0, DFT_COOLDOWN_MAX = 15000, dftTimesUsed = 0;
+var dftActive = false, dftProgress = 0, dftIntervalId = null;
+var slowTimeUntil = 0;
+var shakeIntensity = 0;
+var unlockedAchievements = loadLocalAchievements();
+var highScore = 0;
+var henryQuoteTimer = 0, henryQuoteVisibleUntil = 0;
+var mouseX = 0, mouseY = 0;
+var tsSpawnTimer = 0, tsSpawnInterval = TS_SPAWN_FIRST, tsStabilized = 0;
+var canvas, ctx;
+
+try {
+  highScore = parseInt(localStorage.getItem('henrysNickelQuestHS') || '0', 10) || 0;
+} catch(e) { highScore = 0; }
+
+/* Shared boards are served by the hosted API. No shared credentials belong here. */
+var LEADERBOARD_CONFIG = { API_URL: 'https://henrys-nickel-quest.sunlitmole1.chatgpt.site', GAME_URL: 'https://molindiscovery.github.io/henrys-game/', TOP_N: 10 };
+var LB_MAX_ENTRIES = 50;
+var pendingSubmitScore = 0;
+var onlineLeaderboardCache = null;
+var identity = loadIdentity();
+var syncChain = Promise.resolve();
+var startAfterName = false;
+function lbReadEnabled() { return true; }
+function lbWriteEnabled() { return true; }
+
+/* ----- Sanitizing / merging ----- */
+function sanitizeName(name) {
+  var n = String(name == null ? '' : name).replace(/[<>&"]/g, '').trim().slice(0, 12);
+  return n || 'Anonymous';
+}
+
+function sanitizeEntry(e) {
+  if (!e || typeof e !== 'object') return null;
+  var s = parseInt(e.score, 10);
+  if (!isFinite(s) || s < 0) return null;
+  return {
+    name: sanitizeName(e.name),
+    score: s,
+    level: Math.max(1, parseInt(e.level, 10) || 1),
+    achievements: Math.max(0, parseInt(e.achievements, 10) || 0),
+    date: typeof e.date === 'string' ? e.date.slice(0, 24) : ''
+  };
+}
+
+function normalizeLeaderboard(data) {
+  var out = { version: 1, scores: [], firstUnlocks: {} };
+  if (!data || typeof data !== 'object') return out;
+  if (Array.isArray(data.scores)) {
+    data.scores.forEach(function(e) {
+      var s = sanitizeEntry(e);
+      if (s) out.scores.push(s);
+    });
+  }
+  out.scores.sort(function(a, b) { return b.score - a.score; });
+  out.scores = out.scores.slice(0, LB_MAX_ENTRIES);
+  if (data.firstUnlocks && typeof data.firstUnlocks === 'object') {
+    ACHIEVEMENTS.forEach(function(a) {
+      var u = data.firstUnlocks[a.id];
+      if (u && typeof u === 'object') {
+        out.firstUnlocks[a.id] = {
+          name: sanitizeName(u.name),
+          date: typeof u.date === 'string' ? u.date.slice(0, 10) : ''
+        };
+      }
+    });
+  }
+  return out;
+}
+
+function mergeScores(scores, entry) {
+  var s = sanitizeEntry(entry);
+  if (!s) return scores;
+  var merged = (Array.isArray(scores) ? scores : []).slice();
+  merged.push(s);
+  merged.sort(function(a, b) { return b.score - a.score; });
+  return merged.slice(0, LB_MAX_ENTRIES);
+}
+
+/* ----- Local persistence (offline mode + fallback) ----- */
+function getLocalScores() {
+  try {
+    var arr = JSON.parse(localStorage.getItem('henrysNickelQuestLB') || '[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch(e) { return []; }
+}
+
+function saveLocalScore(entry) {
+  var scores = mergeScores(getLocalScores(), entry);
+  try { localStorage.setItem('henrysNickelQuestLB', JSON.stringify(scores)); } catch(e) {}
+  return scores;
+}
+
+function loadLocalAchievements() {
+  try {
+    var obj = JSON.parse(localStorage.getItem('henrysNickelQuestAch') || '{}');
+    return (obj && typeof obj === 'object') ? obj : {};
+  } catch(e) { return {}; }
+}
+
+function saveLocalAchievements() {
+  try { localStorage.setItem('henrysNickelQuestAch', JSON.stringify(unlockedAchievements)); } catch(e) {}
+}
+
+function getLastPlayerName() {
+  try { return localStorage.getItem('henrysNickelQuestName') || ''; } catch(e) { return ''; }
+}
+
+function saveLastPlayerName(name) {
+  try { localStorage.setItem('henrysNickelQuestName', name); } catch(e) {}
+}
+
+function countUnlockedAchievements() {
+  var n = 0;
+  for (var id in unlockedAchievements) { if (unlockedAchievements[id]) n++; }
+  return n;
+}
+
+function loadIdentity() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('henrysOnlineIdentity') || 'null');
+    return saved && /^[a-f0-9]{64}$/.test(saved.key) && typeof saved.name === 'string' ? saved : null;
+  } catch(e) { return null; }
+}
+function persistIdentity() {
+  try { localStorage.setItem('henrysOnlineIdentity', JSON.stringify(identity)); } catch(e) {}
+}
+function api(path, body) {
+  var controller = new AbortController();
+  var timer = setTimeout(function() { controller.abort(); }, 10000);
+  return fetch(LEADERBOARD_CONFIG.API_URL + path, {
+    method: body ? 'POST' : 'GET',
+    headers: body ? { 'Content-Type': 'application/json' } : {},
+    body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store', signal: controller.signal, credentials: 'omit'
+  }).then(function(r) {
+    return r.json().then(function(data) { if (!r.ok) throw new Error(data.error || 'Server unavailable'); return data; });
+  }).finally(function() { clearTimeout(timer); });
+}
+function fetchOnlineLeaderboard() {
+  return api('/api/board').then(function(data) {
+    var board = normalizeLeaderboard(data);
+    board.players = data.players || [];
+    return board;
+  }).catch(function() { return null; });
+}
+function syncProfile() {
+  if (!identity) return Promise.resolve({ok:false, reason:'Enter your name first'});
+  syncChain = syncChain.catch(function() {}).then(function() {
+    var sent = JSON.parse(JSON.stringify(identity));
+    return api('/api/sync', { key: sent.key, name: sent.name, best: sent.best || null, unlocks: unlockedAchievements }).then(function(data) {
+      identity.name = data.name;
+      identity.registered = true;
+      document.getElementById('title-player-btn').textContent = 'Player: ' + data.name;
+      saveLastPlayerName(data.name);
+      Object.keys(data.unlocks || {}).forEach(function(id) { unlockedAchievements[id] = data.unlocks[id]; });
+      saveLocalAchievements();
+      highScore = Math.max(highScore, data.best ? data.best.score : 0);
+      try { localStorage.setItem('henrysNickelQuestHS', String(highScore)); } catch(e) {}
+      document.getElementById('title-high-score').textContent = highScore.toLocaleString();
+      persistIdentity();
+      return {ok:true};
+    });
+  });
+  return syncChain.catch(function(err) { return {ok:false, reason:err.message}; });
+}
+function submitOnline(entry) {
+  if (!identity) return Promise.resolve({ok:false, reason:'Enter your name first'});
+  if (entry && (!identity.best || entry.score > identity.best.score)) identity.best = entry;
+  persistIdentity();
+  return syncProfile();
+}
+function beginPlay() {
+  initAudio();
+  if (identity && identity.registered) { startGame(); return; }
+  startAfterName = true;
+  pendingSubmitScore = 0;
+  document.getElementById('name-input-score').textContent = 'Join the shared boards';
+  document.getElementById('player-name').value = getLastPlayerName();
+  document.getElementById('name-input-msg').textContent = '';
+  openModal('name-input-modal');
+  setTimeout(function() { document.getElementById('player-name').focus(); }, 50);
+}
+
+/* ----- Rendering ----- */
+function renderLeaderboard(scores, statusText) {
+  var list = document.getElementById('lb-list');
+  var empty = document.getElementById('lb-empty');
+  var status = document.getElementById('lb-status');
+  list.innerHTML = '';
+  if (status) status.textContent = statusText || '';
+  if (!scores || scores.length === 0) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  scores.slice(0, LEADERBOARD_CONFIG.TOP_N).forEach(function(entry, i) {
+    var row = document.createElement('div');
+    row.className = 'lb-entry' + (i === 0 ? ' gold' : i === 1 ? ' silver' : i === 2 ? ' bronze' : '');
+    var rank = document.createElement('span');
+    rank.className = 'lb-rank';
+    rank.textContent = '#' + (i + 1);
+    var name = document.createElement('span');
+    name.className = 'lb-name';
+    name.textContent = entry.name;
+    var meta = document.createElement('span');
+    meta.className = 'lb-meta';
+    meta.textContent = 'Lv ' + entry.level + (entry.date ? ' \u00b7 ' + String(entry.date).slice(0, 10) : '');
+    var sc = document.createElement('span');
+    sc.className = 'lb-score';
+    sc.textContent = entry.score.toLocaleString();
+    row.appendChild(rank);
+    row.appendChild(name);
+    row.appendChild(meta);
+    row.appendChild(sc);
+    list.appendChild(row);
+  });
+}
+
+function renderAchievementsBoard() {
+  var grid = document.getElementById('achievements-grid');
+  grid.innerHTML = '';
+  var firstUnlocks = (onlineLeaderboardCache && onlineLeaderboardCache.firstUnlocks) || {};
+  var players = (onlineLeaderboardCache && onlineLeaderboardCache.players) || [];
+  var playerList = document.getElementById('ach-players');
+  playerList.innerHTML = '';
+  players.forEach(function(p, i) {
+    var row = document.createElement('div'); row.className = 'lb-entry';
+    row.textContent = '#' + (i + 1) + ' ' + p.name + ' — ' + p.achievements + ' / ' + ACHIEVEMENTS.length + ' unlocked';
+    playerList.appendChild(row);
+  });
+  var unlockedCount = 0;
+  ACHIEVEMENTS.forEach(function(ach) {
+    var unlocked = !!unlockedAchievements[ach.id];
+    if (unlocked) unlockedCount++;
+    var card = document.createElement('div');
+    card.className = 'ach-card' + (unlocked ? ' unlocked' : '');
+    var icon = document.createElement('div');
+    icon.className = 'ach-card-icon';
+    icon.textContent = ach.icon;
+    var name = document.createElement('div');
+    name.className = 'ach-card-name';
+    name.textContent = ach.name;
+    var desc = document.createElement('div');
+    desc.className = 'ach-card-desc';
+    desc.textContent = ach.desc;
+    var date = document.createElement('div');
+    date.className = 'ach-card-date';
+    var fu = firstUnlocks[ach.id];
+    if (fu) {
+      date.textContent = 'First: ' + fu.name + (fu.date ? ' \u00b7 ' + fu.date : '');
+    } else if (unlocked) {
+      date.textContent = 'Unlocked ' + String(unlockedAchievements[ach.id]).slice(0, 10);
+    }
+    card.appendChild(icon);
+    card.appendChild(name);
+    card.appendChild(desc);
+    card.appendChild(date);
+    grid.appendChild(card);
+  });
+  document.getElementById('ach-progress-label').textContent =
+    unlockedCount + ' / ' + ACHIEVEMENTS.length + ' unlocked';
+  document.getElementById('ach-progress-fill').style.width =
+    (unlockedCount / ACHIEVEMENTS.length * 100) + '%';
+}
+
+/* ----- Modals ----- */
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModalEl(el) { el.classList.add('hidden'); }
+
+function openLeaderboard() {
+  openModal('leaderboard-modal');
+  renderLeaderboard(getLocalScores(),
+    lbReadEnabled() ? 'Loading online scores\u2026' : 'Offline mode \u2014 showing local scores only');
+  updateShareRow();
+  if (lbReadEnabled()) {
+    fetchOnlineLeaderboard().then(function(data) {
+      if (data) {
+        onlineLeaderboardCache = data;
+        renderLeaderboard(data.scores, 'Online \u00b7 synced ' + new Date().toLocaleTimeString());
+      } else {
+        renderLeaderboard(getLocalScores(), 'Could not reach the online board \u2014 showing local scores');
+      }
+    });
+  }
+}
+
+function openAchievements() {
+  openModal('achievements-modal');
+  renderAchievementsBoard();
+  document.getElementById('ach-status').textContent = 'Loading shared achievements…';
+  fetchOnlineLeaderboard().then(function(data) {
+    document.getElementById('ach-status').textContent = data ? 'Online · first unlocks are recorded when synced' : 'Connection unavailable · showing cached achievements';
+    if (data) { onlineLeaderboardCache = data; renderAchievementsBoard(); }
+  });
+}
+function updateShareRow() { document.getElementById('share-url').value = LEADERBOARD_CONFIG.GAME_URL; }
+function copyShareUrl() {
+  var input = document.getElementById('share-url');
+  if (navigator.clipboard) navigator.clipboard.writeText(input.value).catch(function() { fallbackCopy(input); });
+  else fallbackCopy(input);
+}
+function fallbackCopy(input) { input.select(); try { document.execCommand('copy'); } catch(e) {} }
+
+/* ----- Game-over submit flow ----- */
+function maybePromptSubmit() {
+  if (score <= 0) return;
+  if (identity) {
+    var entry = {name:identity.name, score:score, level:level, achievements:countUnlockedAchievements(), date:new Date().toISOString()};
+    saveLocalScore(entry);
+    submitOnline(entry).then(function(res) {
+      document.getElementById('gameover-sync').textContent = res.ok ? 'Saved to the shared boards' : 'Saved in this browser · will retry online';
+    });
+    document.getElementById('gameover-sync').textContent = 'Saving to shared boards…';
+    return;
+  }
+  pendingSubmitScore = score;
+  document.getElementById('name-input-score').textContent = score.toLocaleString();
+  openModal('name-input-modal');
+}
+function submitPendingScore() {
+  var name = document.getElementById('player-name').value.trim();
+  var msg = document.getElementById('name-input-msg');
+  if (name.length < 2 || name.length > 12 || /[<>&"\x00-\x1f]/.test(name)) {
+    msg.textContent = 'Use 2–12 characters without < > & or quotes.'; return;
+  }
+  var button = document.getElementById('name-submit-btn');
+  if (button.disabled) return;
+  button.disabled = true;
+  if (!identity) {
+    var bytes = new Uint8Array(32); crypto.getRandomValues(bytes);
+    identity = {name:name, key:Array.from(bytes).map(function(v) { return v.toString(16).padStart(2,'0'); }).join('')};
+  }
+  identity.name = name;
+  persistIdentity();
+  saveLastPlayerName(name);
+  msg.textContent = 'Joining the online boards…';
+  syncProfile().then(function(res) {
+    button.disabled = false;
+    if (!res.ok) {
+      msg.textContent = res.reason + '. Try again, or choose Play offline.';
+      return;
+    }
+    if (pendingSubmitScore > 0) {
+      var entry = {name:name,score:pendingSubmitScore,level:level,achievements:countUnlockedAchievements(),date:new Date().toISOString()};
+      saveLocalScore(entry); submitOnline(entry);
+    }
+    closeModalEl(document.getElementById('name-input-modal'));
+    if (startAfterName) { startAfterName = false; startGame(); }
+  });
+}
+
+/* ============================================================
+   AUDIO (Web Audio API, no external files)
+============================================================ */
+var audioCtx = null;
+function initAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e) { audioCtx = null; }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function tone(freq, dur, type, vol) {
+  if (!audioCtx) return;
+  var osc = audioCtx.createOscillator();
+  var gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol || 0.2, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (dur || 0.1));
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + (dur || 0.1));
+}
+function sfxCoordinate()  { tone(880, 0.08, 'sine', 0.15); }
+function sfxComplete()    { tone(523,0.08,'sine',0.25); setTimeout(function(){tone(659,0.08,'sine',0.25);},70); setTimeout(function(){tone(784,0.14,'sine',0.25);},140); }
+function sfxLoseLife()    { tone(180, 0.35, 'sawtooth', 0.25); }
+function sfxLevelUp()     { [523,659,784,1047].forEach(function(f,i){ setTimeout(function(){ tone(f,0.12,'sine',0.25); }, i*90); }); }
+function sfxAchievement() { tone(1047,0.12,'sine',0.25); setTimeout(function(){ tone(1319,0.18,'sine',0.25); },110); }
+function sfxClick()       { tone(440, 0.04, 'square', 0.08); }
+function sfxDft()         { tone(600,0.06,'triangle',0.15); setTimeout(function(){tone(900,0.1,'triangle',0.15);},80); }
+function sfxTsAppear()     { tone(300,0.15,'sawtooth',0.18); setTimeout(function(){ tone(200,0.25,'sawtooth',0.18); },120); }
+function sfxTsClick()      { tone(1200,0.05,'square',0.15); }
+function sfxTsConverged()  { [784,880,988,1175,1319].forEach(function(f,i){ setTimeout(function(){ tone(f,0.1,'sine',0.3); }, i*70); }); }
+function sfxTsDecomposed() { tone(150,0.4,'sawtooth',0.22); }
+
+/* ============================================================
+   CLASSES
+============================================================ */
+function NiIon(isTS) {
+  this.x = 60 + Math.random() * (CANVAS_W - 120);
+  this.y = isTS ? -80 : -50;
+  this.radius = isTS ? 32 : 28;
+  this.ligands = [];
+  this.type = rollNiType();
+  this.wobble = Math.random() * Math.PI * 2;
+  this.pulse = Math.random() * Math.PI * 2;
+  this.dead = false;
+  this.isTS = !!isTS;
+  this.tsProgress = 0;
+}
+function rollNiType() {
+  var r = Math.random();
+  if (r < 0.35) return 'hard';
+  if (r < 0.70) return 'soft';
+  return 'borderline';
+}
+NiIon.prototype.update = function(delta) {
+  var speedMul = (Date.now() < slowTimeUntil) ? 0.3 : 1;
+  var fallMul = this.isTS ? TS_FALL_MULT : 1;
+  this.y += fallSpeed * delta * speedMul * fallMul;
+  this.wobble += delta * 0.002;
+  this.pulse  += delta * (this.isTS ? 0.012 : 0.004);
+};
+NiIon.prototype.ligandPos = function(i) {
+  var angle = (i / MAX_LIGANDS) * Math.PI * 2 - Math.PI / 2;
+  var dist = this.radius + 18;
+  return { x: this.x + Math.cos(angle) * dist, y: this.y + Math.sin(angle) * dist };
+};
+NiIon.prototype.contains = function(px, py) {
+  var dx = px - this.x, dy = py - this.y;
+  return Math.sqrt(dx*dx + dy*dy) <= this.radius + 25;
+};
+NiIon.prototype.addLigand = function(idx) {
+  if (this.ligands.length >= MAX_LIGANDS) return false;
+  this.ligands.push(idx);
+  return true;
+};
+NiIon.prototype.isComplete = function() { return this.ligands.length >= MAX_LIGANDS; };
+NiIon.prototype.draw = function() {
+  if (this.isTS) { this.drawTS(); return; }
+  var color = NI_TYPE_COLORS[this.type];
+  var pulseScale = 1 + Math.sin(this.pulse) * 0.05;
+  var r = this.radius * pulseScale;
+  var inDanger = this.y > CANVAS_H - DANGER_ZONE;
+
+  // Glow
+  var grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 2.2);
+  grad.addColorStop(0, hexA(color, 0.18));
+  grad.addColorStop(1, hexA(color, 0));
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(this.x, this.y, r * 2.2, 0, Math.PI * 2); ctx.fill();
+
+  // Danger pulse ring
+  if (inDanger) {
+    var dp = Math.sin(Date.now() / 90) * 0.5 + 0.5;
+    ctx.strokeStyle = 'rgba(255,68,68,' + (0.35 + dp * 0.5) + ')';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(this.x, this.y, r + 5, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  // Main body
+  ctx.fillStyle = '#0a0e1a';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+  // Ni2+ label
+  ctx.fillStyle = color;
+  ctx.font = 'bold 14px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Ni\u00B2\u207A', this.x, this.y - 4);
+
+  // Type label
+  ctx.font = 'bold 8px "JetBrains Mono", monospace';
+  ctx.fillStyle = hexA(color, 0.7);
+  ctx.fillText(NI_TYPE_NAMES[this.type], this.x, this.y + 11);
+
+  // Ligand count
+  ctx.font = '9px "JetBrains Mono", monospace';
+  ctx.fillStyle = this.ligands.length === MAX_LIGANDS ? '#00ff88' : hexA(color, 0.6);
+  ctx.fillText(this.ligands.length + '/' + MAX_LIGANDS, this.x, this.y + r + 13);
+
+  // Attached ligands
+  for (var i = 0; i < this.ligands.length; i++) {
+    var lig = LIGANDS[this.ligands[i]];
+    var pos = this.ligandPos(i);
+    var wob = Math.sin(this.wobble + i * 1.5) * 2;
+    // bond line
+    ctx.strokeStyle = hexA(lig.color, 0.4);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(pos.x, pos.y + wob); ctx.stroke();
+    // ligand dot
+    ctx.fillStyle = lig.color;
+    ctx.beginPath(); ctx.arc(pos.x, pos.y + wob, 7, 0, Math.PI * 2); ctx.fill();
+    // formula
+    ctx.fillStyle = '#0a0e1a';
+    ctx.font = 'bold 6.5px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(lig.formula, pos.x, pos.y + wob);
+  }
+};
+
+NiIon.prototype.drawTS = function() {
+  var color = TS_COLOR;
+  var r = this.radius;
+  var jitterX = (Math.random() - 0.5) * 5;
+  var jitterY = (Math.random() - 0.5) * 5;
+  var cx = this.x + jitterX;
+  var cy = this.y + jitterY;
+  var inDanger = this.y > CANVAS_H - DANGER_ZONE;
+
+  // Glow
+  var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 2.5);
+  grad.addColorStop(0, hexA(color, 0.25));
+  grad.addColorStop(1, hexA(color, 0));
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(cx, cy, r * 2.5, 0, Math.PI * 2); ctx.fill();
+
+  // Danger pulse
+  if (inDanger) {
+    var dp = Math.sin(Date.now() / 90) * 0.5 + 0.5;
+    ctx.strokeStyle = 'rgba(255,68,68,' + (0.35 + dp * 0.5) + ')';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, r + 5, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  // Distorted body (wobbly polygon - saddle point!)
+  ctx.fillStyle = '#1a1208';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  var segments = 16;
+  for (var a = 0; a <= segments; a++) {
+    var angle = (a / segments) * Math.PI * 2;
+    var wobble = Math.sin(angle * 3 + this.pulse) * 4 + Math.sin(angle * 5 + this.pulse * 1.7) * 2;
+    var px = cx + Math.cos(angle) * (r + wobble);
+    var py = cy + Math.sin(angle) * (r + wobble);
+    if (a === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Progress ring background
+  ctx.strokeStyle = hexA(color, 0.2);
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + 9, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Progress ring fill
+  var progress = this.tsProgress / 100;
+  if (progress > 0) {
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 9, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Double dagger symbol (transition state notation)
+  ctx.fillStyle = color;
+  ctx.font = 'bold 24px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('\u2021', cx, cy - 2);
+
+  // TS label
+  ctx.font = 'bold 8px "JetBrains Mono", monospace';
+  ctx.fillStyle = hexA(color, 0.8);
+  ctx.fillText('TRANSITION STATE', cx, cy + 15);
+
+  // Progress percentage
+  ctx.font = '9px "JetBrains Mono", monospace';
+  ctx.fillStyle = progress >= 1 ? '#00ff88' : hexA(color, 0.7);
+  ctx.fillText(Math.round(this.tsProgress) + '% optimized', cx, cy + r + 22);
+
+  // Imaginary frequency indicators (vibration modes)
+  var waveCount = 4;
+  for (var w = 0; w < waveCount; w++) {
+    var wa = (w / waveCount) * Math.PI * 2 + this.pulse * 0.5;
+    var wx = cx + Math.cos(wa) * (r + 18);
+    var wy = cy + Math.sin(wa) * (r + 18);
+    var wavePhase = Math.sin(this.pulse * 2 + w) * 2;
+    ctx.strokeStyle = hexA(color, 0.5);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(wx - 4, wy + wavePhase);
+    ctx.lineTo(wx + 4, wy - wavePhase);
+    ctx.stroke();
+  }
+};
+
+function Particle(x, y, color) {
+  var angle = Math.random() * Math.PI * 2;
+  var spd = 1 + Math.random() * 4;
+  this.x = x; this.y = y;
+  this.vx = Math.cos(angle) * spd;
+  this.vy = Math.sin(angle) * spd - 1.5;
+  this.color = color;
+  this.size = 2 + Math.random() * 4;
+  this.life = 1.0;
+  this.decay = 0.015 + Math.random() * 0.025;
+}
+Particle.prototype.update = function(delta) {
+  this.x += this.vx * delta;
+  this.y += this.vy * delta;
+  this.vy += 0.003 * delta * 16.67;
+  this.life -= this.decay * delta * 0.06;
+};
+Particle.prototype.draw = function() {
+  ctx.globalAlpha = Math.max(0, this.life);
+  ctx.fillStyle = this.color;
+  ctx.beginPath(); ctx.arc(this.x, this.y, this.size * Math.max(0.2, this.life), 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+};
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function hexA(hex, alpha) {
+  var r = parseInt(hex.substr(1,2),16), g = parseInt(hex.substr(3,2),16), b = parseInt(hex.substr(5,2),16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+function rand(a, b) { return a + Math.random() * (b - a); }
+
+function spawnNi() { niIons.push(new NiIon()); }
+
+function spawnTS() {
+  var ts = new NiIon(true);
+  ts.x = CANVAS_W / 2 + (Math.random() - 0.5) * 300;
+  niIons.push(ts);
+}
+
+function stabilizeTS(ion) {
+  var pts = TS_BASE_POINTS * level;
+  score += pts;
+  tsStabilized++;
+
+  explode(ion.x, ion.y, [TS_COLOR, '#ffcc44', '#00ff88', '#ffffff'], 40);
+  ion.dead = true;
+
+  sfxTsConverged();
+  floatText('TS CONVERGED!', ion.x, ion.y - 55, '#00ff88');
+  floatText('+' + pts, ion.x, ion.y - 75, TS_COLOR);
+  showHenryQuote('Saddle point located!');
+
+  if (tsStabilized === 1)  checkAchievement('ts_first');
+  if (tsStabilized === 5)  checkAchievement('ts_five');
+  if (tsStabilized === 10) checkAchievement('ts_ten');
+
+  updateUI();
+}
+
+function explode(x, y, colors, count) {
+  count = count || 25;
+  for (var i = 0; i < count; i++) {
+    particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+  }
+}
+
+function floatText(text, x, y, color) {
+  floatingTexts.push({ text: text, x: x, y: y, color: color, life: 1, vy: -0.8 });
+}
+
+function calcComplexScore(ion) {
+  var base = 0, cfse = 0, hsab = 0, homoleptic = 0;
+  var counts = {};
+  for (var i = 0; i < ion.ligands.length; i++) {
+    var idx = ion.ligands[i];
+    counts[idx] = (counts[idx] || 0) + 1;
+    base += LIGANDS[idx].points;
+  }
+  // CFSE: strong-field ligands (en=3, cn=4)
+  var strongCount = (counts[3] || 0) + (counts[4] || 0);
+  cfse = strongCount * 20;
+  // HSAB match
+  for (var j = 0; j < ion.ligands.length; j++) {
+    var lig = LIGANDS[ion.ligands[j]];
+    if (HSAB_MATCH[ion.type] && HSAB_MATCH[ion.type].indexOf(lig.id) !== -1) {
+      hsab += 15;
+    }
+  }
+  // Homoleptic
+  var keys = Object.keys(counts);
+  if (keys.length === 1) {
+    homoleptic = 100;
+    checkAchievement('homoleptic');
+    var only = ion.ligands[0];
+    if (only === 3 || only === 4) checkAchievement('low_spin');
+    if (only === 0 || only === 2) checkAchievement('high_spin');
+  }
+  // Chelate
+  if (ion.ligands.indexOf(3) !== -1) checkAchievement('chelate');
+
+  return Math.round((base + cfse + hsab + homoleptic + 50) * level);
+}
+
+function completeComplex(ion) {
+  var pts = calcComplexScore(ion);
+  score += pts;
+  complexesCompleted++;
+  hIndex = Math.floor(complexesCompleted / 5);
+
+  var colors = ion.ligands.map(function(idx){ return LIGANDS[idx].color; });
+  colors.push(NI_TYPE_COLORS[ion.type]);
+  explode(ion.x, ion.y, colors, 32);
+  ion.dead = true;
+
+  sfxComplete();
+  floatText('+' + pts, ion.x, ion.y - 45, '#00ff88');
+  floatText('Complex!', ion.x, ion.y - 65, NI_TYPE_COLORS[ion.type]);
+
+  if (complexesCompleted === 1)  checkAchievement('first_complex');
+  if (complexesCompleted === 10) checkAchievement('ten_complexes');
+  if (complexesCompleted === 50) checkAchievement('fifty_complexes');
+  if (hIndex >= 10) checkAchievement('hindex_10');
+
+  var newLevel = Math.floor(complexesCompleted / 5) + 1;
+  if (newLevel > level) {
+    level = newLevel;
+    sfxLevelUp();
+    floatText('LEVEL ' + level + '!', CANVAS_W / 2, CANVAS_H / 2, '#00d4ff');
+    spawnInterval = Math.max(800, 3000 - (level - 1) * 250);
+    fallSpeed = 1.0 + (level - 1) * 0.12;
+    if (level === 5) checkAchievement('level_5');
+  }
+
+  updateUI();
+}
+
+/* ============================================================
+   UPDATE
+============================================================ */
+function update(delta) {
+  if (state !== 'playing' || paused || dftActive) return;
+
+  // Spawn
+  spawnTimer += delta * 16.67;
+  if (spawnTimer >= spawnInterval) {
+    spawnTimer = 0;
+    spawnNi();
+  }
+
+  // TS spawn timer
+  tsSpawnTimer += delta * 16.67;
+  if (tsSpawnTimer >= tsSpawnInterval) {
+    var hasTS = false;
+    for (var t = 0; t < niIons.length; t++) {
+      if (niIons[t].isTS && !niIons[t].dead) { hasTS = true; break; }
+    }
+    if (!hasTS && niIons.length < 6) {
+      tsSpawnTimer = 0;
+      tsSpawnInterval = rand(TS_SPAWN_MIN, TS_SPAWN_MAX);
+      spawnTS();
+      sfxTsAppear();
+      floatText('TS INCOMING!', CANVAS_W / 2, 60, TS_COLOR);
+    } else {
+      tsSpawnTimer = tsSpawnInterval * 0.9;
+    }
+  }
+
+  // Ni ions
+  for (var i = niIons.length - 1; i >= 0; i--) {
+    var ion = niIons[i];
+    ion.update(delta);
+    if (ion.y > CANVAS_H + 50 && !ion.dead) {
+      ion.dead = true;
+      if (ion.isTS) {
+        var penalty = TS_MISS_PENALTY * level;
+        score = Math.max(0, score - penalty);
+        shakeIntensity = 8;
+        sfxTsDecomposed();
+        floatText('TS DECOMPOSED', ion.x, CANVAS_H - 30, '#ff4444');
+        floatText('-' + penalty, ion.x, CANVAS_H - 50, '#ff4444');
+        explode(ion.x, Math.min(ion.y, CANVAS_H - 20), ['#ff4444', '#ff8844', TS_COLOR], 25);
+        showHenryQuote('Don\u2019t let it decompose!');
+        updateUI();
+      } else {
+        lives--;
+        shakeIntensity = 12;
+        sfxLoseLife();
+        floatText('LOST!', ion.x, CANVAS_H - 30, '#ff4444');
+        explode(ion.x, Math.min(ion.y, CANVAS_H - 20), ['#ff4444', '#ff8844'], 18);
+        updateUI();
+        if (lives <= 0) { gameOver(); return; }
+      }
+    }
+  }
+  niIons = niIons.filter(function(ion){ return !ion.dead; });
+
+  // Particles
+  for (var p = particles.length - 1; p >= 0; p--) {
+    particles[p].update(delta);
+    if (particles[p].life <= 0) particles.splice(p, 1);
+  }
+
+  // Floating texts
+  for (var f = floatingTexts.length - 1; f >= 0; f--) {
+    var ft = floatingTexts[f];
+    ft.y += ft.vy;
+    ft.life -= 0.014;
+    if (ft.life <= 0) floatingTexts.splice(f, 1);
+  }
+
+  // DFT cooldown
+  if (dftCooldown > 0) {
+    dftCooldown -= delta * 16.67;
+    if (dftCooldown < 0) dftCooldown = 0;
+    updateDftBtn();
+  }
+
+  // Shake decay
+  if (shakeIntensity > 0) shakeIntensity *= 0.85;
+
+  // Henry quotes
+  henryQuoteTimer += delta * 16.67;
+  if (henryQuoteTimer > 9000 && niIons.length > 0) {
+    henryQuoteTimer = 0;
+    showHenryQuote(HENRY_QUOTES[Math.floor(Math.random() * HENRY_QUOTES.length)]);
+  }
+
+  // BG dots
+  for (var d = 0; d < bgDots.length; d++) {
+    var dot = bgDots[d];
+    dot.y -= dot.speed * delta * 0.5;
+    if (dot.y < -10) { dot.y = CANVAS_H + 10; dot.x = Math.random() * CANVAS_W; }
+  }
+}
+
+/* ============================================================
+   RENDER
+============================================================ */
+function render() {
+  ctx.save();
+
+  // Screen shake
+  if (shakeIntensity > 0.5) {
+    ctx.translate((Math.random()-0.5)*shakeIntensity, (Math.random()-0.5)*shakeIntensity);
+  }
+
+  // Background
+  ctx.fillStyle = '#0a0e1a';
+  ctx.fillRect(-20, -20, CANVAS_W + 40, CANVAS_H + 40);
+
+  drawGrid();
+  drawBgDots();
+  drawDangerZone();
+
+  // Ni ions
+  for (var i = 0; i < niIons.length; i++) niIons[i].draw();
+
+  // Particles
+  for (var p = 0; p < particles.length; p++) particles[p].draw();
+
+  // Floating texts
+  for (var f = 0; f < floatingTexts.length; f++) {
+    var ft = floatingTexts[f];
+    ctx.globalAlpha = Math.max(0, ft.life);
+    ctx.fillStyle = ft.color;
+    ctx.font = 'bold 15px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(ft.text, ft.x, ft.y);
+    ctx.globalAlpha = 1;
+  }
+
+  // Cursor indicator
+  if (state === 'playing' && !paused && !dftActive) {
+    var hoverTS = null;
+    for (var h = 0; h < niIons.length; h++) {
+      if (niIons[h].isTS && niIons[h].contains(mouseX, mouseY)) { hoverTS = niIons[h]; break; }
+    }
+    if (hoverTS) {
+      ctx.strokeStyle = TS_COLOR;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.arc(mouseX, mouseY, 18, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = hexA(TS_COLOR, 0.2);
+      ctx.beginPath(); ctx.arc(mouseX, mouseY, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = TS_COLOR;
+      ctx.font = 'bold 11px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('\u2021 OPTIMIZE', mouseX, mouseY - 26);
+    } else {
+      var lig = LIGANDS[selectedLigand];
+      ctx.strokeStyle = lig.color;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.arc(mouseX, mouseY, 18, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = hexA(lig.color, 0.2);
+      ctx.beginPath(); ctx.arc(mouseX, mouseY, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = lig.color;
+      ctx.font = 'bold 11px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(lig.formula, mouseX, mouseY - 26);
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawGrid() {
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  var gs = 40;
+  for (var x = 0; x <= CANVAS_W; x += gs) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_H); ctx.stroke();
+  }
+  for (var y = 0; y <= CANVAS_H; y += gs) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_W, y); ctx.stroke();
+  }
+}
+
+function drawDangerZone() {
+  var grad = ctx.createLinearGradient(0, CANVAS_H - DANGER_ZONE, 0, CANVAS_H);
+  grad.addColorStop(0, 'rgba(255,68,68,0)');
+  grad.addColorStop(1, 'rgba(255,68,68,0.1)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, CANVAS_H - DANGER_ZONE, CANVAS_W, DANGER_ZONE);
+  // dashed line
+  ctx.strokeStyle = 'rgba(255,68,68,0.25)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 6]);
+  ctx.beginPath(); ctx.moveTo(0, CANVAS_H - DANGER_ZONE); ctx.lineTo(CANVAS_W, CANVAS_H - DANGER_ZONE); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawBgDots() {
+  for (var i = 0; i < bgDots.length; i++) {
+    var dot = bgDots[i];
+    ctx.fillStyle = 'rgba(0,212,255,' + dot.alpha + ')';
+    ctx.beginPath(); ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function initBgDots() {
+  bgDots = [];
+  for (var i = 0; i < 30; i++) {
+    bgDots.push({
+      x: Math.random() * CANVAS_W,
+      y: Math.random() * CANVAS_H,
+      size: rand(1, 2.5),
+      speed: rand(0.1, 0.4),
+      alpha: rand(0.08, 0.22)
+    });
+  }
+}
+
+/* ============================================================
+   INPUT
+============================================================ */
+function canvasCoords(clientX, clientY) {
+  var rect = canvas.getBoundingClientRect();
+  var sx = canvas.width / rect.width;
+  var sy = canvas.height / rect.height;
+  return { x: (clientX - rect.left) * sx, y: (clientY - rect.top) * sy };
+}
+
+function handleTap(clientX, clientY) {
+  if (state !== 'playing' || paused || dftActive) return;
+  var c = canvasCoords(clientX, clientY);
+  mouseX = c.x; mouseY = c.y;
+
+  for (var i = niIons.length - 1; i >= 0; i--) {
+    var ion = niIons[i];
+    if (ion.contains(c.x, c.y)) {
+      if (ion.isTS) {
+        ion.tsProgress += TS_CLICK_PROGRESS;
+        sfxTsClick();
+        explode(ion.x, ion.y, [TS_COLOR, '#ffcc44'], 6);
+        floatText('+' + TS_CLICK_PROGRESS + '%', ion.x, ion.y - 55, TS_COLOR);
+        if (ion.tsProgress >= 100) stabilizeTS(ion);
+        updateUI();
+        break;
+      }
+      if (ion.addLigand(selectedLigand)) {
+        sfxCoordinate();
+        var lig = LIGANDS[selectedLigand];
+        score += lig.points * level;
+        var pos = ion.ligandPos(ion.ligands.length - 1);
+        explode(pos.x, pos.y, [lig.color], 5);
+
+        // HSAB feedback
+        if (HSAB_MATCH[ion.type] && HSAB_MATCH[ion.type].indexOf(lig.id) !== -1) {
+          floatText('HSAB +15', ion.x, ion.y - 80, '#00ff88');
+        }
+
+        if (ion.isComplete()) completeComplex(ion);
+        updateUI();
+      }
+      break;
+    }
+  }
+}
+
+function handleMove(clientX, clientY) {
+  var c = canvasCoords(clientX, clientY);
+  mouseX = c.x; mouseY = c.y;
+}
+
+function handleKey(e) {
+  if (e.key === 'Escape') {
+    var openModalEl = document.querySelector('.modal-overlay:not(.hidden)');
+    if (openModalEl) closeModalEl(openModalEl);
+    return;
+  }
+  if (state !== 'playing') return;
+  if (e.key >= '1' && e.key <= '5') {
+    var idx = parseInt(e.key, 10) - 1;
+    if (idx !== selectedLigand) {
+      selectedLigand = idx;
+      sfxClick();
+      updateLigandBar();
+    }
+  }
+  if (e.key === 'p' || e.key === 'P') {
+    paused = !paused;
+    document.getElementById('pause-overlay').classList.toggle('show', paused);
+  }
+}
+
+/* ============================================================
+   UI
+============================================================ */
+function updateUI() {
+  document.getElementById('score').textContent = score.toLocaleString();
+  document.getElementById('level').textContent = level;
+  document.getElementById('lives').textContent = Math.max(0, lives);
+  document.getElementById('h-index').textContent = hIndex;
+  document.getElementById('ts-count').textContent = tsStabilized;
+}
+
+function updateLigandBar() {
+  var btns = document.querySelectorAll('.ligand-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('selected', i === selectedLigand);
+  }
+}
+
+function updateDftBtn() {
+  var btn = document.getElementById('dft-btn');
+  if (dftCooldown > 0) {
+    btn.disabled = true;
+    btn.textContent = 'DFT (' + Math.ceil(dftCooldown / 1000) + 's)';
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Run DFT';
+  }
+}
+
+function showHenryQuote(text) {
+  var el = document.getElementById('henry-quote');
+  el.textContent = '\u201C' + text + '\u201D';
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+  henryQuoteVisibleUntil = Date.now() + 4500;
+  setTimeout(function() {
+    if (Date.now() > henryQuoteVisibleUntil) el.classList.remove('show');
+  }, 4500);
+}
+
+function showAchievementToast(ach) {
+  var toast = document.getElementById('achievement-toast');
+  document.getElementById('achievement-icon').textContent = ach.icon;
+  document.getElementById('achievement-text').innerHTML =
+    '<strong>' + ach.name + '</strong><small>' + ach.desc + '</small>';
+  toast.classList.remove('hidden');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  sfxAchievement();
+  setTimeout(function() {
+    toast.classList.remove('show');
+    setTimeout(function(){ toast.classList.add('hidden'); }, 350);
+  }, 3200);
+}
+
+function checkAchievement(id) {
+  if (unlockedAchievements[id]) return;
+  var ach = null;
+  for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+    if (ACHIEVEMENTS[i].id === id) { ach = ACHIEVEMENTS[i]; break; }
+  }
+  if (ach) {
+    unlockedAchievements[id] = new Date().toISOString();
+    saveLocalAchievements();
+    if (identity) syncProfile();
+    showAchievementToast(ach);
+  }
+}
+
+/* ============================================================
+   DFT ABILITY
+============================================================ */
+function runDFT() {
+  if (dftCooldown > 0 || dftActive || state !== 'playing' || paused) return;
+  initAudio();
+  sfxDft();
+  dftActive = true;
+  dftProgress = 0;
+  dftTimesUsed++;
+  if (dftTimesUsed === 10) checkAchievement('dft_10');
+
+  var overlay = document.getElementById('dft-overlay');
+  overlay.classList.remove('hidden');
+
+  var steps = [
+    'Initializing basis set...',
+    'SCF iteration 1...',
+    'SCF iteration 2...',
+    'SCF iteration 3...',
+    'SCF iteration 4...',
+    'Geometry optimization...',
+    'Frequency calculation...',
+    'Analyzing wavefunction...',
+    'Converged!'
+  ];
+
+  dftIntervalId = setInterval(function() {
+    dftProgress += 2;
+    document.getElementById('dft-bar').style.width = dftProgress + '%';
+    var stepIdx = Math.min(Math.floor(dftProgress / 11), steps.length - 1);
+    document.getElementById('dft-text').textContent = steps[stepIdx];
+    if (dftProgress >= 100) {
+      clearInterval(dftIntervalId);
+      finishDFT();
+    }
+  }, 28);
+}
+
+function finishDFT() {
+  dftActive = false;
+  document.getElementById('dft-overlay').classList.add('hidden');
+  document.getElementById('dft-bar').style.width = '0%';
+
+  var outcomes = [
+    { label: 'SCF Converged!', fn: function() {
+      var bonus = 500 * level;
+      score += bonus;
+      floatText('+' + bonus + ' SCF!', CANVAS_W/2, 100, '#00ff88');
+    }},
+    { label: 'Geometry Optimized!', fn: function() {
+      for (var i = 0; i < niIons.length; i++) niIons[i].ligands = [];
+      floatText('Geometry Optimized!', CANVAS_W/2, 100, '#00d4ff');
+    }},
+    { label: 'Low Energy Found!', fn: function() {
+      slowTimeUntil = Date.now() + 5000;
+      floatText('Time Slowed!', CANVAS_W/2, 100, '#ff88ff');
+    }},
+    { label: 'Wavefunction Analyzed!', fn: function() {
+      var bonus = 300 * level;
+      score += bonus;
+      floatText('+' + bonus + ' Analysis!', CANVAS_W/2, 100, '#ffdd44');
+    }},
+    { label: 'TS Optimization Boost!', fn: function() {
+      var tsIon = null;
+      for (var i = 0; i < niIons.length; i++) {
+        if (niIons[i].isTS && !niIons[i].dead) { tsIon = niIons[i]; break; }
+      }
+      if (tsIon) {
+        tsIon.tsProgress = Math.min(100, tsIon.tsProgress + 50);
+        floatText('TS +50%!', tsIon.x, tsIon.y - 55, TS_COLOR);
+        explode(tsIon.x, tsIon.y, [TS_COLOR], 10);
+        if (tsIon.tsProgress >= 100) stabilizeTS(tsIon);
+      } else {
+        var bonus = 200 * level;
+        score += bonus;
+        floatText('+' + bonus + ' (no TS)', CANVAS_W/2, 100, '#00d4ff');
+      }
+    }}
+  ];
+
+  var outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+  outcome.fn();
+  showHenryQuote(outcome.label);
+
+  dftCooldown = DFT_COOLDOWN_MAX;
+  updateDftBtn();
+  updateUI();
+}
+
+/* ============================================================
+   GAME FLOW
+============================================================ */
+function startGame() {
+  state = 'playing';
+  paused = false;
+  score = 0; level = 1; lives = 3;
+  complexesCompleted = 0; hIndex = 0;
+  niIons = []; particles = []; floatingTexts = [];
+  selectedLigand = 0;
+  spawnTimer = spawnInterval; // spawn immediately
+  spawnInterval = 3000;
+  fallSpeed = 1.0;
+  dftCooldown = 0; dftTimesUsed = 0;
+  slowTimeUntil = 0;
+  shakeIntensity = 0;
+  henryQuoteTimer = 0;
+  mouseX = CANVAS_W / 2; mouseY = CANVAS_H / 2;
+  tsSpawnTimer = TS_SPAWN_FIRST * 0.8;
+  tsSpawnInterval = TS_SPAWN_FIRST;
+  tsStabilized = 0;
+
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('game-over-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  document.getElementById('pause-overlay').classList.remove('show');
+
+  updateUI();
+  updateLigandBar();
+  updateDftBtn();
+  initBgDots();
+
+  lastTime = performance.now();
+}
+
+function gameOver() {
+  state = 'gameover';
+  var isRecord = score > highScore && score > 0;
+  if (isRecord) {
+    highScore = score;
+    try { localStorage.setItem('henrysNickelQuestHS', String(highScore)); } catch(e) {}
+  }
+
+  document.getElementById('final-score').textContent = score.toLocaleString();
+  document.getElementById('final-level').textContent = level;
+  document.getElementById('final-complexes').textContent = complexesCompleted;
+  document.getElementById('final-hindex').textContent = hIndex;
+  document.getElementById('final-ts').textContent = tsStabilized;
+  document.getElementById('final-dft').textContent = dftTimesUsed;
+  document.getElementById('final-highscore').textContent = highScore.toLocaleString();
+  document.getElementById('henry-reaction').textContent =
+    HENRY_GAMEOVER_LINES[Math.floor(Math.random() * HENRY_GAMEOVER_LINES.length)];
+  document.getElementById('new-record-banner').innerHTML =
+    isRecord ? '<div class="new-record">NEW HIGH SCORE!</div>' : '';
+
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('game-over-screen').classList.remove('hidden');
+
+  maybePromptSubmit();
+}
+
+/* ============================================================
+   MAIN LOOP
+============================================================ */
+function loop(timestamp) {
+  var rawDt = timestamp - lastTime;
+  lastTime = timestamp;
+  var delta = Math.min(rawDt / 16.67, 3); // normalize to 60fps, cap at 3x
+
+  update(delta);
+  render();
+
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+function init() {
+  canvas = document.getElementById('game-canvas');
+  ctx = canvas.getContext('2d');
+
+  // Build ligand buttons
+  var bar = document.getElementById('ligand-bar');
+  LIGANDS.forEach(function(lig, i) {
+    var btn = document.createElement('button');
+    btn.className = 'ligand-btn' + (i === 0 ? ' selected' : '');
+    btn.style.setProperty('--ligand-color', lig.color);
+    btn.innerHTML =
+      '<span class="ligand-key">' + lig.key + '</span>' +
+      '<span class="ligand-formula">' + lig.formula + '</span>' +
+      '<span class="ligand-name">' + lig.name + '</span>' +
+      '<span class="ligand-pts">' + lig.points + ' pts/ligand</span>';
+    btn.addEventListener('click', function() {
+      if (state !== 'playing') return;
+      selectedLigand = i;
+      sfxClick();
+      updateLigandBar();
+    });
+    bar.appendChild(btn);
+  });
+
+  // Canvas input
+  var lastTouchTime = 0;
+  canvas.addEventListener('click', function(e) {
+    if (Date.now() - lastTouchTime < 500) return;
+    handleTap(e.clientX, e.clientY);
+  });
+  canvas.addEventListener('mousemove', function(e) { handleMove(e.clientX, e.clientY); });
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    lastTouchTime = Date.now();
+    if (e.touches.length > 0) handleTap(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: false });
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (e.touches.length > 0) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: false });
+  canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+  // Keyboard
+  document.addEventListener('keydown', handleKey);
+
+  // Buttons
+  document.getElementById('start-btn').addEventListener('click', beginPlay);
+  document.getElementById('restart-btn').addEventListener('click', beginPlay);
+  document.getElementById('dft-btn').addEventListener('click', runDFT);
+
+  document.getElementById('title-player-btn').textContent = identity ? 'Player: ' + identity.name : 'Choose player name';
+  document.getElementById('title-player-btn').addEventListener('click', function() {
+    startAfterName = false;
+    pendingSubmitScore = 0;
+    document.getElementById('name-input-score').textContent = identity ? 'Update your name' : 'Join the shared boards';
+    document.getElementById('player-name').value = identity ? identity.name : getLastPlayerName();
+    document.getElementById('name-input-msg').textContent = '';
+    openModal('name-input-modal');
+    document.getElementById('player-name').focus();
+  });
+  // Leaderboard / achievements
+  document.getElementById('title-lb-btn').addEventListener('click', function() {
+    sfxClick(); openLeaderboard();
+  });
+  document.getElementById('title-ach-btn').addEventListener('click', function() {
+    sfxClick(); openAchievements();
+  });
+  document.getElementById('gameover-lb-btn').addEventListener('click', function() {
+    sfxClick(); openLeaderboard();
+  });
+
+  // Modal close buttons + click on backdrop
+  var closeBtns = document.querySelectorAll('.modal-close');
+  for (var ci = 0; ci < closeBtns.length; ci++) {
+    closeBtns[ci].addEventListener('click', function() {
+      closeModalEl(this.closest('.modal-overlay'));
+    });
+  }
+  var overlays = document.querySelectorAll('.modal-overlay');
+  for (var oi = 0; oi < overlays.length; oi++) {
+    overlays[oi].addEventListener('click', function(e) {
+      if (e.target === this) closeModalEl(this);
+    });
+  }
+
+  // Name input modal
+  document.getElementById('name-submit-btn').addEventListener('click', submitPendingScore);
+  document.getElementById('name-skip-btn').addEventListener('click', function() {
+    closeModalEl(document.getElementById('name-input-modal'));
+    if (startAfterName) { startAfterName = false; startGame(); }
+  });
+  document.getElementById('player-name').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitPendingScore();
+    if (e.key === 'Escape') closeModalEl(document.getElementById('name-input-modal'));
+  });
+
+  document.getElementById('share-copy-btn').addEventListener('click', copyShareUrl);
+
+  // High score on title
+  document.getElementById('title-high-score').textContent = highScore.toLocaleString();
+
+  // Restore this browser’s player and retry pending saves
+  if (identity) syncProfile();
+  window.addEventListener('online', function() { if (identity) syncProfile(); });
+  setInterval(function() {
+    if (identity) syncProfile();
+    if (!document.getElementById('leaderboard-modal').classList.contains('hidden')) openLeaderboard();
+    if (!document.getElementById('achievements-modal').classList.contains('hidden')) openAchievements();
+  }, 15000);
+
+  // Start
+  initBgDots();
+  requestAnimationFrame(loop);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+</body>
+</html>
