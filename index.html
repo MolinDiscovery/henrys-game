@@ -1033,6 +1033,7 @@
     <div class="title-buttons">
       <div id="gameover-sync" class="lb-status" role="status"></div>
       <button id="gameover-lb-btn" type="button">Leaderboard</button>
+      <button id="main-menu-btn" type="button">Main Menu</button>
     </div>
   </div>
 
@@ -2441,6 +2442,16 @@ function startGame() {
   lastTime = performance.now();
 }
 
+function returnToMainMenu() {
+  state = 'title';
+  paused = false;
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('game-over-screen').classList.add('hidden');
+  document.getElementById('title-screen').classList.remove('hidden');
+  document.getElementById('title-high-score').textContent = highScore.toLocaleString();
+  document.getElementById('start-btn').focus();
+}
+
 function gameOver() {
   state = 'gameover';
   var isRecord = score > highScore && score > 0;
@@ -2532,6 +2543,7 @@ function init() {
   // Buttons
   document.getElementById('start-btn').addEventListener('click', beginPlay);
   document.getElementById('restart-btn').addEventListener('click', beginPlay);
+  document.getElementById('main-menu-btn').addEventListener('click', returnToMainMenu);
   document.getElementById('dft-btn').addEventListener('click', runDFT);
 
   document.getElementById('title-player-btn').textContent = identity ? 'Player: ' + identity.name : 'Choose player name';
