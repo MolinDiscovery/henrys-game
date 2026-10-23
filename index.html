@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Henry's Nickel Quest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +30,7 @@
     background: var(--bg);
     color: var(--text);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -212,6 +213,7 @@
     display: block;
     width: 100%;
     height: auto;
+    aspect-ratio: 8 / 5;
     cursor: crosshair;
     background: var(--bg);
     touch-action: none;
@@ -770,7 +772,8 @@
     .ni-tile .sym { font-size: 1.3rem; }
     .instructions { font-size: 0.75rem; padding: 14px 16px; line-height: 1.7; }
     #top-bar { gap: 8px 14px; padding: 8px 12px; }
-    .stat { font-size: 0.72rem; }
+    .stat { font-size: 0.72rem; grid-column: span 2; }
+    #top-bar .stat:nth-child(4), #top-bar .stat:nth-child(5) { grid-column: span 3; }
     #dft-btn { padding: 5px 14px; font-size: 0.72rem; }
     #ligand-bar { padding: 8px; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     #ligand-bar::-webkit-scrollbar { display: none; }
@@ -896,6 +899,68 @@
     .stat-box .value { font-size: 0.85rem; }
     #footer { font-size: 0.5rem; padding: 3px; }
   }
+
+  .instructions summary { cursor: pointer; color: var(--cyan); font-weight: bold; padding: 8px 0; }
+  .instructions[open] summary { margin-bottom: 8px; }
+  button { touch-action: manipulation; }
+  #pause-btn { padding: 7px 14px; font-size: 0.8rem; margin-left: auto; }
+  #dft-btn { margin-left: 0; }
+  #pause-btn[aria-pressed="true"] { background: var(--cyan); color: var(--bg); }
+  body.in-game #footer { display: none; }
+  input { user-select: text; -webkit-user-select: text; }
+
+  @media (max-width: 600px), (max-height: 500px) and (max-width: 1000px) {
+    body { justify-content: flex-start; }
+    #game-wrapper { padding: 6px; }
+    body.in-game { overflow: hidden; }
+    #game-screen { display: flex; flex-direction: column; height: calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); min-height: 260px; }
+    #top-bar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px 8px; padding: 8px; flex: none; align-items: center; }
+    .stat { font-size: 0.72rem; }
+    #pause-btn, #dft-btn { min-height: 44px; width: 100%; margin: 0; padding: 6px; font-size: 0.76rem; }
+    #pause-btn { grid-column: span 3; }
+    #dft-btn { grid-column: span 3; }
+    #canvas-container { flex: 1 1 0; min-height: 100px; overflow: hidden; }
+    #game-canvas { width: 100%; height: 100%; }
+    #ligand-bar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: visible; flex: none; gap: 5px; padding: 8px 6px; }
+    .ligand-btn { min-width: 0; min-height: 58px; width: 100%; padding: 6px 2px; }
+    .ligand-key, .ligand-name, .per-ligand { display: none; }
+    .ligand-formula { font-size: 1rem; margin: 0; }
+    .ligand-pts { font-size: 0.6rem; }
+    #title-screen { max-height: none; overflow: visible; padding: 22px 14px; }
+    #title-screen h1 { font-size: clamp(1.3rem, 6vw, 1.8rem); }
+    .instructions { font-size: 0.82rem; line-height: 1.6; text-align: left; padding: 8px 12px; }
+    .instructions summary { min-height: 44px; display: list-item; padding: 10px 0; }
+    button, .title-buttons button { min-height: 44px; padding: 10px 14px; font-size: 0.85rem; }
+    .title-buttons { gap: 8px; }
+    #start-btn { width: 100%; font-size: 1rem; }
+    #game-over-screen { max-height: none; overflow: visible; padding: 22px 12px; }
+    .stat-box .label { font-size: 0.65rem; }
+    .stat-box .value { font-size: 1.2rem; }
+    #gameover-sync { width: 100%; }
+    .modal-overlay { padding: 8px; }
+    .modal-content { padding: 18px 14px; max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+    .modal-close { width: 44px; height: 44px; min-height: 44px; padding: 0; top: 6px; right: 6px; }
+    .modal-content h2 { padding-right: 44px; }
+    #player-name, .share-row input { font-size: 16px; min-width: 0; }
+    .share-row button { flex: none; min-height: 44px; }
+    .achievements-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .lb-entry { padding: 10px 8px; gap: 6px; flex-wrap: wrap; }
+    .lb-name { min-width: 70px; }
+    .lb-meta { order: 4; width: 100%; padding-left: 30px; }
+    .lb-rank { width: 24px; }
+    #henry-quote { font-size: 0.65rem; max-width: 180px; }
+    #achievement-toast { pointer-events: none; top: 110px; }
+  }
+  @media (max-height: 500px) and (max-width: 1000px) and (orientation: landscape) {
+    #top-bar { grid-template-columns: repeat(5, minmax(0, 1fr)) 76px 88px; padding: 4px 8px; gap: 4px; }
+    #pause-btn, #dft-btn { grid-column: auto; }
+    #top-bar .stat, #top-bar .stat:nth-child(4), #top-bar .stat:nth-child(5) { grid-column: auto; font-size: 0.65rem; }
+    #ligand-bar { padding: 5px 8px; }
+    .ligand-btn { min-height: 48px; flex-direction: row; justify-content: center; gap: 8px; }
+    #achievement-toast { top: 56px; }
+    #game-over-screen #final-stats { grid-template-columns: repeat(4, 1fr); }
+  }
+
 </style>
 </head>
 <body>
@@ -943,17 +1008,17 @@
 
     <p class="starring">Starring <b>Henry</b> &mdash; Computational Chemist &amp; Nickel Enthusiast</p>
 
-    <div class="instructions">
-      <h3>How to Play</h3>
+    <details class="instructions" open>
+      <summary>How to Play</summary>
       <ul>
         <li><b>Ni&sup2;&plus; ions</b> fall from the top of the simulation box. Catch them!</li>
-        <li><b>Select a ligand</b> (click or press <b>1&ndash;5</b>), then <b>click a Ni&sup2;&plus;</b> to coordinate it.</li>
+        <li><b>Select a ligand</b> (tap, click or press <b>1&ndash;5</b>), then <b>tap a Ni&sup2;&plus;</b> to coordinate it.</li>
         <li>Each Ni&sup2;&plus; needs <b>6 ligands</b> to form a stable octahedral complex.</li>
         <li><b>HSAB matching:</b> match hard Ni&sup2;&plus; with hard bases (H&#8322;O, Cl&#8315;), soft Ni&sup2;&plus; with soft bases (CN&#8315;, en) for bonuses.</li>
         <li><b>Strong-field ligands</b> (CN&#8315;, en) give CFSE bonuses. <b>Homoleptic</b> complexes (all same ligand) earn big bonuses.</li>
         <li>Don't let Ni&sup2;&plus; reach the bottom &mdash; you lose research grants (lives)!</li>
-        <li><b>Transition states (&Dagger;)</b> appear occasionally &mdash; click them rapidly to optimize the saddle point before they decompose. Big rewards!</li>
-        <li>Press <b>P</b> to pause. Click <b>Run DFT</b> for a computational chemistry power-up.</li>
+        <li><b>Transition states (&Dagger;)</b> appear occasionally &mdash; tap them rapidly to optimize the saddle point before they decompose. Big rewards!</li>
+        <li>Tap <b>Pause</b> (or press <b>P</b>). Tap <b>Run DFT</b> for a computational chemistry power-up.</li>
       </ul>
       <p style="margin-top:10px; color:var(--dim); font-size:0.75rem;">
         Ligands:
@@ -963,7 +1028,7 @@
         <span class="ligand-demo" style="background:#BA68C8"></span>en (soft, strong field)
         <span class="ligand-demo" style="background:#E57373"></span>CN&#8315; (soft, strong field)
       </p>
-    </div>
+    </details>
 
     <button id="start-btn">Start Experiment</button>
     <p class="title-highscore">High Score: <span id="title-high-score">0</span></p>
@@ -982,6 +1047,7 @@
       <span class="stat lives">Grants: <b id="lives">3</b></span>
       <span class="stat hindex">h-index: <b id="h-index">0</b></span>
       <span class="stat ts">TS: <b id="ts-count">0</b></span>
+      <button id="pause-btn" type="button" aria-pressed="false">Pause</button>
       <button id="dft-btn">Run DFT</button>
     </div>
 
@@ -1009,7 +1075,7 @@
         <div id="henry-quote"></div>
       </div>
 
-      <div id="pause-overlay">PAUSED &mdash; press P to resume</div>
+      <div id="pause-overlay">PAUSED &mdash; tap Resume to continue</div>
     </div>
 
     <div id="ligand-bar"></div>
@@ -1109,6 +1175,7 @@
 ============================================================ */
 var CANVAS_W = 800;
 var CANVAS_H = 500;
+var compactLayout = window.matchMedia("(max-width: 600px), (max-height: 500px) and (max-width: 1000px)");
 var MAX_LIGANDS = 6;
 var DANGER_ZONE = 100; // bottom pixels considered "danger"
 var TS_COLOR = '#ffaa00';
@@ -1642,7 +1709,7 @@ function rollNiType() {
 NiIon.prototype.update = function(delta) {
   var speedMul = (Date.now() < slowTimeUntil) ? 0.3 : 1;
   var fallMul = this.isTS ? TS_FALL_MULT : 1;
-  this.y += fallSpeed * delta * speedMul * fallMul;
+  this.y += fallSpeed * delta * speedMul * fallMul * (CANVAS_H / 500);
   this.wobble += delta * 0.002;
   this.pulse  += delta * (this.isTS ? 0.012 : 0.004);
 };
@@ -2179,8 +2246,8 @@ function initBgDots() {
 ============================================================ */
 function canvasCoords(clientX, clientY) {
   var rect = canvas.getBoundingClientRect();
-  var sx = canvas.width / rect.width;
-  var sy = canvas.height / rect.height;
+  var sx = CANVAS_W / rect.width;
+  var sy = CANVAS_H / rect.height;
   return { x: (clientX - rect.left) * sx, y: (clientY - rect.top) * sy };
 }
 
@@ -2226,6 +2293,33 @@ function handleMove(clientX, clientY) {
   mouseX = c.x; mouseY = c.y;
 }
 
+function setPaused(value) {
+  if (state !== 'playing') return;
+  paused = value;
+  document.getElementById('pause-overlay').classList.toggle('show', paused);
+  document.getElementById('pause-btn').textContent = paused ? 'Resume' : 'Pause';
+  document.getElementById('pause-btn').setAttribute('aria-pressed', String(paused));
+}
+
+function resizeGameCanvas() {
+  if (!canvas || state !== 'playing') return;
+  var rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  var oldWidth = CANVAS_W, oldHeight = CANVAS_H;
+  CANVAS_W = compactLayout.matches && rect.height > rect.width ? 480 : 800;
+  CANVAS_H = compactLayout.matches ? Math.round(CANVAS_W * rect.height / rect.width) : 500;
+  var pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
+  canvas.width = Math.round(rect.width * pixelRatio);
+  canvas.height = Math.round(rect.height * pixelRatio);
+  ctx.setTransform(canvas.width / CANVAS_W, 0, 0, canvas.height / CANVAS_H, 0, 0);
+  niIons.forEach(function(ion) {
+    ion.x = Math.max(60, Math.min(CANVAS_W - 60, ion.x * CANVAS_W / oldWidth));
+    if (ion.y > 0) ion.y = ion.y * CANVAS_H / oldHeight;
+  });
+  particles = []; floatingTexts = [];
+  initBgDots();
+}
+
 function handleKey(e) {
   if (e.key === 'Escape') {
     var openModalEl = document.querySelector('.modal-overlay:not(.hidden)');
@@ -2242,8 +2336,7 @@ function handleKey(e) {
     }
   }
   if (e.key === 'p' || e.key === 'P') {
-    paused = !paused;
-    document.getElementById('pause-overlay').classList.toggle('show', paused);
+    setPaused(!paused);
   }
 }
 
@@ -2262,6 +2355,7 @@ function updateLigandBar() {
   var btns = document.querySelectorAll('.ligand-btn');
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('selected', i === selectedLigand);
+    btns[i].setAttribute('aria-pressed', String(i === selectedLigand));
   }
 }
 
@@ -2412,7 +2506,8 @@ function finishDFT() {
 ============================================================ */
 function startGame() {
   state = 'playing';
-  paused = false;
+  document.body.classList.add('in-game');
+  setPaused(false);
   score = 0; level = 1; lives = 3;
   complexesCompleted = 0; hIndex = 0;
   niIons = []; particles = []; floatingTexts = [];
@@ -2434,6 +2529,7 @@ function startGame() {
   document.getElementById('game-screen').classList.remove('hidden');
   document.getElementById('pause-overlay').classList.remove('show');
 
+  resizeGameCanvas();
   updateUI();
   updateLigandBar();
   updateDftBtn();
@@ -2444,6 +2540,7 @@ function startGame() {
 
 function returnToMainMenu() {
   state = 'title';
+  document.body.classList.remove('in-game');
   paused = false;
   document.getElementById('game-screen').classList.add('hidden');
   document.getElementById('game-over-screen').classList.add('hidden');
@@ -2454,6 +2551,7 @@ function returnToMainMenu() {
 
 function gameOver() {
   state = 'gameover';
+  document.body.classList.remove('in-game');
   var isRecord = score > highScore && score > 0;
   if (isRecord) {
     highScore = score;
@@ -2505,11 +2603,13 @@ function init() {
     var btn = document.createElement('button');
     btn.className = 'ligand-btn' + (i === 0 ? ' selected' : '');
     btn.style.setProperty('--ligand-color', lig.color);
+    btn.setAttribute('aria-label', lig.formula + ', ' + lig.name + ', ' + lig.points + ' points per ligand');
+    btn.setAttribute('aria-pressed', String(i === selectedLigand));
     btn.innerHTML =
       '<span class="ligand-key">' + lig.key + '</span>' +
       '<span class="ligand-formula">' + lig.formula + '</span>' +
       '<span class="ligand-name">' + lig.name + '</span>' +
-      '<span class="ligand-pts">' + lig.points + ' pts/ligand</span>';
+      '<span class="ligand-pts">' + lig.points + ' pts<span class="per-ligand">/ligand</span></span>';
     btn.addEventListener('click', function() {
       if (state !== 'playing') return;
       selectedLigand = i;
@@ -2519,23 +2619,23 @@ function init() {
     bar.appendChild(btn);
   });
 
-  // Canvas input
-  var lastTouchTime = 0;
-  canvas.addEventListener('click', function(e) {
-    if (Date.now() - lastTouchTime < 500) return;
+  canvas.addEventListener('pointerdown', function(e) {
+    if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault();
     handleTap(e.clientX, e.clientY);
   });
-  canvas.addEventListener('mousemove', function(e) { handleMove(e.clientX, e.clientY); });
-  canvas.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    lastTouchTime = Date.now();
-    if (e.touches.length > 0) handleTap(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: false });
-  canvas.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-    if (e.touches.length > 0) handleMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: false });
+  canvas.addEventListener('pointermove', function(e) {
+    if (e.isPrimary) handleMove(e.clientX, e.clientY);
+  });
   canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  document.querySelector('.instructions').open = !compactLayout.matches;
+  var resizeFrame;
+  window.addEventListener('resize', function() {
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(resizeGameCanvas);
+  });
+  document.addEventListener('visibilitychange', function() { if (document.hidden) setPaused(true); });
+  document.getElementById('pause-btn').addEventListener('click', function() { setPaused(!paused); });
 
   // Keyboard
   document.addEventListener('keydown', handleKey);
