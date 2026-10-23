@@ -1,6 +1,8 @@
-# Henry’s Nickel Quest
+# Henry’s Nickel Quest — Version 4
 
 A browser game about nickel coordination chemistry, made for Henry.
+
+Version 4 includes shared leaderboards and achievements, phone-friendly controls, a Main Menu button after game over, and codes for connecting the same player across devices.
 
 [Play the game](https://molindiscovery.github.io/henrys-game/)
 
