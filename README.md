@@ -1,31 +1,43 @@
-# Henry’s Nickel Quest — Version 4
+# Henry’s Nickel Quest — Version 5: The Research Lab
 
-A browser game about nickel coordination chemistry, made for Henry.
+[Play Version 5](https://molindiscovery.github.io/henrys-game/) · [Version 4 standings](https://molindiscovery.github.io/henrys-game/v4.html)
 
-Version 4 includes shared leaderboards and achievements, phone-friendly controls, a Main Menu button after game over, and codes for connecting the same player across devices.
+A computational chemistry arcade lab made for Henry. Assign jobs, rescue calculations, publish projects and improve your lab. The chemistry mechanics are playful abstractions.
 
-[Play the game](https://molindiscovery.github.io/henrys-game/)
+## Play
 
-Select a ligand and click falling nickel ions to complete complexes. Catch transition states and run DFT calculations for extra help.
+1. Choose a ligand and method, then tap a nickel complex once. Coordination runs automatically; tapping an existing job prioritizes it. Use Reassign deliberately to change its ligand or method.
+2. Match hard ions with water/chloride, borderline ions with ammonia, and soft ions with en/cyanide. Water returns compute, chloride provides a second chance, en fills two positions at once, ammonia is quick, and cyanide offers a quality premium.
+3. Choose xTB for free quick screening, DFT for higher-quality results (22 compute), or UMA for rapid jobs (9 compute). Unusual UMA geometries ask for a manual check or DFT benchmark.
+4. Calculate opens four reliable tools: Geometry fills a selected complex; Frequency reveals the final saddle-point node; Single point benchmarks a result; SCF rescue temporarily slows the lab. Compute replenishes over time and from completed jobs.
+5. Complete the project’s required complexes. Its secondary objective is optional. Publish, recover one grant and choose one of three lab upgrades. You can finish and submit the run after any publication.
+6. Optional saddle points follow a numbered three-node path. Later projects add movement, branching decoration and benchmark encounters. Missing them costs no grants.
 
-## Shared boards
+A run begins with three grants. Difficulty builds modestly within projects and is capped rather than escalating without limit. Publishing creates a breather. Upgrades include more cores, better initial guesses, checkpoints, emergency coffee, reviewer insurance, compute allocation, funding and convergence consulting.
 
-Choose a player name on first play. The same browser remembers your player; personal bests and achievements sync automatically to the shared service. Open Leaderboard for personal bests or Achievements for player rankings and first unlocks.
+## Seasons and achievements
 
-Browser storage identifies each player. Clearing it or changing browsers may require another name. This is a friendly competition; scores are reported by the browser.
+Version 5 uses fresh score, achievement and career-stat tables. Version 4 data is preserved, accessible through the read-only archive. Player names and device connections are shared across versions. No legacy scores or unlocks are imported into the new competition.
 
-## Publishing
+Career milestones accumulate across runs and connected devices: complexes, published projects, DFT calculations, saddle points, benchmarks and manual UMA checks. Separate single-run feats include a clean project, an xTB-only project, publication on the last grant and ten DFT calculations in one run. An xTB-only project permits no DFT tools or jobs.
 
-GitHub Pages publishes index.html from the main branch. Update that file and push to publish a new version. The .nojekyll file keeps this a plain HTML site. No build or dependency installation is required.
+Personal bests are saved at publications and at run completion. The server merges each device’s monotonic career component using MAX, then sums components; repeated/offline syncs do not double-count them. Gameplay remains client-reported for friendly competition.
 
-The service URL in LEADERBOARD_CONFIG connects the shared boards; GAME_URL controls the link players copy to share the game. No shared service credentials are embedded.
+## Connect devices
 
-## Use your player on another device
+On the browser that has your player, open Connect devices and create a code. Enter it in Connect devices on your other device. Both devices remember the same player. Codes expire after 10 minutes and connect one device. Keep them private. No signup is needed.
 
-1. On the device that already has your player, open **Connect devices** and select **Create a code**.
-2. On your other device, open the game, select **Connect devices**, enter that code and select **Connect player**.
-3. Both devices now share the player’s personal best and unlocked achievements. Each device remembers the player afterward.
+If every connected browser loses its storage, there is no account recovery. Connecting a different player keeps its progress separate.
 
-For example, create a code on your Mac while signed in as FRUST, then enter it on your phone. Anyone can use this feature for their own player. A code expires after 10 minutes and connects one device. Keep it private. To connect a third device, create another code.
+## Development and publishing
 
-Connecting to a player keeps different players’ progress separate. It does not merge scores from another player already saved in the receiving browser.
+index.html is the complete distributable game. GitHub Pages publishes the main branch without a build. v4.html is a read-only legacy standings page. The shared service URL is configured in LEADERBOARD_CONFIG; its API supports season v5 while preserving default Version 4 routes.
+
+Checks:
+
+```sh
+node scripts/check-research.mjs
+node scripts/check-mobile.mjs
+```
+
+The research check covers automatic jobs, ligand economy, deterministic tools, project/upgrades, career milestones and simulated multi-project pacing. The mobile check covers pixel-density scaling, coordinates and rotation. Browser checks additionally cover the project-to-publication loop and phone controls.

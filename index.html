@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Henry's Nickel Quest — v4</title>
+<title>Henry's Nickel Quest — v5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -971,6 +971,58 @@
   #device-code { display: block; margin: 16px 0 12px; font-size: clamp(16px, 4.7vw, 24px); font-weight: bold; color: var(--green); text-align: center; letter-spacing: 1px; user-select: text; -webkit-user-select: text; }
   .device-message { font-size: 0.8rem; line-height: 1.6; margin-top: 10px; overflow-wrap: anywhere; color: var(--yellow); }
   .game-version { color: var(--cyan); font-size: 0.8rem; margin: 6px 0 10px; letter-spacing: 1px; }
+
+  .archive-link { display: inline-flex; align-items: center; padding: 10px; color: var(--dim); font-size: .75rem; }
+  #lab-status { flex: none; padding: 10px 12px; background: #101a29; border-bottom: 1px solid var(--border); line-height: 1.4; }
+  .project-line, .compute-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: .74rem; }
+  .project-line { color: var(--cyan); margin-bottom: 6px; }
+  #cores-value { flex: none; color: var(--dim); }
+  .compute-row { color: var(--dim); }
+  .compute-track { flex: 1; max-width: 260px; height: 6px; background: #253148; border-radius: 6px; overflow: hidden; }
+  #compute-fill { width: 60%; height: 100%; background: var(--cyan); transition: width .2s; }
+  #method-bar { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin: 9px 0; }
+  #method-bar button, #calculation-panel button { min-height: 44px; padding: 7px; font-size: .8rem; border: 1px solid #344058; background: #101724; color: var(--text); border-radius: 7px; }
+  #method-bar button[aria-pressed="true"] { border-color: var(--cyan); background: #123043; color: var(--cyan); }
+  #method-bar small, #calculation-panel small { display: block; font-size: .65rem; color: var(--dim); font-weight: normal; margin-top: 3px; }
+  #target-label { font-size: .7rem; color: #adbbd1; }
+  #lab-message { font-size: .7rem; color: #aebcd1; margin-top: 5px; min-height: 2.8em; }
+  #calculation-panel { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; margin-top: 8px; }
+  #calculation-panel button:disabled { opacity: .45; }
+  .eyebrow { color: var(--yellow); font-size: .65rem; letter-spacing: 2px; margin-bottom: 12px; }
+  .project-card p { font-size: .85rem; line-height: 1.7; }
+  .project-goal { background: #142438; border-left: 3px solid var(--cyan); padding: 12px; font-size: .85rem; line-height: 1.7; margin: 18px 0; }
+  .project-card h3 { color: var(--cyan); font-size: .9rem; margin: 20px 0 12px; }
+  #begin-project-btn, .bank-button { width: 100%; min-height: 44px; font-size: .85rem; }
+  #upgrade-choices { display: grid; gap: 10px; }
+  .upgrade-card { display: block; width: 100%; background: #111f2f; color: var(--text); border: 1px solid #2a4763; text-align: left; padding: 16px; border-radius: 9px; }
+  .upgrade-card strong { display: block; color: var(--green); font-size: .9rem; }
+  .upgrade-card span { display: block; font-size: .75rem; line-height: 1.6; margin-top: 6px; font-weight: normal; }
+  .bank-button { background: transparent; border: 1px solid var(--dim); color: var(--text); margin-top: 20px; }
+  .achievement-counter { font-size: .7rem; color: var(--cyan); margin-top: 7px; }
+  @media(max-width:600px), (max-height:500px) and (max-width:1000px) {
+    #lab-status { padding: 7px 8px; }
+    #lab-message { font-size: .65rem; min-height: 2.8em; }
+    .project-line, .compute-row { font-size: .65rem; }
+    #method-bar { margin: 6px 0; }
+    #method-bar button, #calculation-panel button { font-size: .75rem; min-height: 44px; }
+    #method-bar small, #calculation-panel small { font-size: .6rem; }
+    #calculation-panel { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    #game-screen { min-height: 460px; }
+    body.in-game { overflow-y: auto; }
+    .project-card { padding: 22px 16px; }
+  }
+  @media(max-height:500px) and (max-width:1000px) and (orientation:landscape) {
+    #game-screen { min-height: 350px; }
+    #lab-status { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; padding: 5px 8px; }
+    #method-bar { grid-column: 2; grid-row: 1 / span 3; margin: 0; }
+    #lab-message { grid-column: 1 / -1; min-height: 1.4em; }
+    #calculation-panel { grid-column: 1 / -1; grid-template-columns: repeat(4,1fr); }
+  }
+
+  .ligand-name { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media(max-width:600px) { #achievement-toast { top: auto; bottom: 90px; } }
+  .target-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+  #reassign-job-btn { min-height: 44px; padding: 8px 12px; font-size: .7rem; flex: none; background: #18344a; color: var(--cyan); }
 </style>
 </head>
 <body>
@@ -979,8 +1031,8 @@
   <!-- ===== TITLE SCREEN ===== -->
   <div id="title-screen">
     <h1>Henry's Nickel Quest</h1>
-    <p class="game-version">Version 4</p>
-    <p class="subtitle">A Computational Chemistry Adventure</p>
+    <p class="game-version">Version 5 · The Research Lab</p>
+    <p class="subtitle">Research, rescue, publish. Repeat.</p>
 
     <div class="title-row">
       <div class="henry-avatar">
@@ -1022,14 +1074,13 @@
     <details class="instructions" open>
       <summary>How to Play</summary>
       <ul>
-        <li><b>Ni&sup2;&plus; ions</b> fall from the top of the simulation box. Catch them!</li>
-        <li><b>Select a ligand</b> (tap, click or press <b>1&ndash;5</b>), then <b>tap a Ni&sup2;&plus;</b> to coordinate it.</li>
-        <li>Each Ni&sup2;&plus; needs <b>6 ligands</b> to form a stable octahedral complex.</li>
-        <li><b>HSAB matching:</b> match hard Ni&sup2;&plus; with hard bases (H&#8322;O, Cl&#8315;), soft Ni&sup2;&plus; with soft bases (CN&#8315;, en) for bonuses.</li>
-        <li><b>Strong-field ligands</b> (CN&#8315;, en) give CFSE bonuses. <b>Homoleptic</b> complexes (all same ligand) earn big bonuses.</li>
-        <li>Don't let Ni&sup2;&plus; reach the bottom &mdash; you lose research grants (lives)!</li>
-        <li><b>Transition states (&Dagger;)</b> appear occasionally &mdash; tap them rapidly to optimize the saddle point before they decompose. Big rewards!</li>
-        <li>Tap <b>Pause</b> (or press <b>P</b>). Tap <b>Run DFT</b> for a computational chemistry power-up.</li>
+        <li><b>Choose a ligand and method</b>, then tap a nickel complex once. Your lab fills its six coordination positions automatically.</li>
+        <li><b>Read the label:</b> hard, soft or borderline. Matching ligands run faster and earn a better paper. Tap a queued job to prioritize it.</li>
+        <li><b>xTB</b> is fast and free. <b>DFT</b> gives better results for 22 compute. <b>UMA</b> is quick for 9 compute, but unusual geometries need a check.</li>
+        <li><b>Calculate</b> opens four reliable tools: geometry, frequency, single point and SCF rescue. Compute recharges and completed jobs return some.</li>
+        <li><b>Publish each project</b>, recover funding and choose a lab upgrade. You can bank your run after any publication.</li>
+        <li><b>Optional saddle points:</b> follow the glowing nodes in order. Letting them pass costs no grants.</li>
+        <li><b>Pause</b> whenever you need. Career achievements accumulate across runs. This is a playful chemistry abstraction, not a simulation.</li>
       </ul>
       <p style="margin-top:10px; color:var(--dim); font-size:0.75rem;">
         Ligands:
@@ -1041,13 +1092,14 @@
       </p>
     </details>
 
-    <button id="start-btn">Start Experiment</button>
+    <button id="start-btn">Open the lab</button>
     <p class="title-highscore">High Score: <span id="title-high-score">0</span></p>
     <div class="title-buttons">
       <button id="title-lb-btn" type="button">Leaderboard</button>
       <button id="title-ach-btn" type="button" class="ach-btn">Achievements</button>
       <button id="title-player-btn" type="button">Choose player name</button>
       <button id="title-devices-btn" type="button">Connect devices</button>
+      <a class="archive-link" href="https://molindiscovery.github.io/henrys-game/v4.html">Version 4 archive</a>
     </div>
     <p id="device-connected-status" class="device-help" role="status"></p>
   </div>
@@ -1056,14 +1108,31 @@
   <div id="game-screen" class="hidden">
     <div id="top-bar">
       <span class="stat">Score: <b id="score">0</b></span>
-      <span class="stat">Level: <b id="level">1</b></span>
+      <span class="stat">Project: <b id="level">1</b></span>
       <span class="stat lives">Grants: <b id="lives">3</b></span>
-      <span class="stat hindex">h-index: <b id="h-index">0</b></span>
+      <span class="stat hindex">Papers: <b id="h-index">0</b></span>
       <span class="stat ts">TS: <b id="ts-count">0</b></span>
       <button id="pause-btn" type="button" aria-pressed="false">Pause</button>
-      <button id="dft-btn">Run DFT</button>
+      <button id="dft-btn" type="button" aria-expanded="false" aria-controls="calculation-panel">Calculate</button>
     </div>
 
+    <div id="lab-status">
+      <div class="project-line"><span id="project-progress">Ready for research</span><span id="cores-value">1 core</span></div>
+      <div class="compute-row"><span>Compute <b id="compute-value">60 / 100</b></span><div class="compute-track"><div id="compute-fill"></div></div></div>
+      <div id="method-bar" aria-label="Calculation method">
+        <button type="button" data-method="xtb" aria-pressed="true">xTB <small>free · quick</small></button>
+        <button type="button" data-method="dft" aria-pressed="false">DFT <small>22 · quality</small></button>
+        <button type="button" data-method="uma" aria-pressed="false">UMA <small>9 · rapid</small></button>
+      </div>
+      <div class="target-row"><div id="target-label">Tap a complex to assign or prioritize a job</div><button id="reassign-job-btn" type="button" class="hidden">Reassign</button></div>
+      <div id="calculation-panel" class="hidden">
+        <button type="button" data-calculation="geometry">Geometry <small>25 · fill positions</small></button>
+        <button type="button" data-calculation="frequency">Frequency <small>15 · reveal TS</small></button>
+        <button type="button" data-calculation="single">Single point <small>15 · benchmark</small></button>
+        <button type="button" data-calculation="rescue">SCF rescue <small>20 · slow the lab</small></button>
+      </div>
+      <p id="lab-message" role="status">Ready for your first research project.</p>
+    </div>
     <div id="canvas-container">
       <canvas id="game-canvas" width="800" height="500"></canvas>
 
@@ -1096,16 +1165,16 @@
 
   <!-- ===== GAME OVER SCREEN ===== -->
   <div id="game-over-screen" class="hidden">
-    <h2>Simulation Terminated</h2>
+    <h2>Research run complete</h2>
     <p class="henry-reaction" id="henry-reaction"></p>
     <div id="new-record-banner"></div>
     <div id="final-stats">
       <div class="stat-box"><div class="label">Final Score</div><div class="value" id="final-score">0</div></div>
-      <div class="stat-box"><div class="label">Level Reached</div><div class="value" id="final-level">1</div></div>
+      <div class="stat-box"><div class="label">Project Reached</div><div class="value" id="final-level">1</div></div>
       <div class="stat-box"><div class="label">Complexes Formed</div><div class="value" id="final-complexes">0</div></div>
-      <div class="stat-box"><div class="label">h-index</div><div class="value" id="final-hindex">0</div></div>
+      <div class="stat-box"><div class="label">Papers Published</div><div class="value" id="final-hindex">0</div></div>
       <div class="stat-box"><div class="label">TS Stabilized</div><div class="value" id="final-ts" style="color:var(--amber)">0</div></div>
-      <div class="stat-box"><div class="label">DFT Runs</div><div class="value" id="final-dft" style="color:var(--cyan)">0</div></div>
+      <div class="stat-box"><div class="label">DFT Calculations</div><div class="value" id="final-dft" style="color:var(--cyan)">0</div></div>
       <div class="stat-box highlight" style="grid-column: span 2;"><div class="label">High Score</div><div class="value" id="final-highscore">0</div></div>
     </div>
     <button id="restart-btn">Run Again</button>
@@ -1133,7 +1202,7 @@
   <div id="leaderboard-modal" class="modal-overlay hidden">
     <div class="modal-content">
       <button class="modal-close" type="button" aria-label="Close">&times;</button>
-      <h2>Leaderboard</h2>
+      <h2>Version 5 Leaderboard</h2>
       <div class="lb-status" id="lb-status"></div>
       <div class="lb-list" id="lb-list"></div>
       <div class="lb-empty hidden" id="lb-empty">No scores yet &mdash; be the first!</div>
@@ -1149,7 +1218,7 @@
   <div id="achievements-modal" class="modal-overlay hidden">
     <div class="modal-content">
       <button class="modal-close" type="button" aria-label="Close">&times;</button>
-      <h2>Achievements</h2>
+      <h2>Version 5 Achievements</h2>
       <div class="lb-status" id="ach-status"></div>
       <div id="ach-players" class="lb-list"></div>
       <div class="ach-progress-wrap">
@@ -1160,6 +1229,12 @@
     </div>
   </div>
 
+  <div id="project-brief-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="project-brief-title" data-required>
+    <div class="modal-content project-card"><div class="eyebrow">NEW RESEARCH PROJECT</div><h2 id="project-brief-title"></h2><p id="project-brief-copy"></p><div id="project-brief-goal" class="project-goal"></div><p id="project-brief-tip" class="device-help"></p><button id="begin-project-btn" type="button">Begin project</button></div>
+  </div>
+  <div id="project-review-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="review-title" data-required>
+    <div class="modal-content project-card"><div class="eyebrow">BREATHER · FUNDING RENEWED</div><h2 id="review-title"></h2><p id="review-copy"></p><p id="review-stats" class="device-help"></p><h3>Choose your next lab upgrade</h3><div id="upgrade-choices"></div><button id="bank-run-btn" type="button" class="bank-button">Bank score &amp; finish run</button></div>
+  </div>
   <!-- ===== NAME INPUT MODAL ===== -->
   <div id="name-input-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Your player">
     <div class="modal-content">
@@ -1205,7 +1280,7 @@
   </div>
 </div>
 
-<div id="footer">Made for <b>Henry</b> &middot; Version 4 &middot; Computational Chemistry Edition &middot; Ni <b>28</b></div>
+<div id="footer">Made for <b>Henry</b> &middot; Version 5 &middot; Computational Chemistry Edition &middot; Ni <b>28</b></div>
 
 <script>
 (function() {
@@ -1229,11 +1304,11 @@ var TS_SPAWN_MIN = 18000;
 var TS_SPAWN_MAX = 28000;
 
 var LIGANDS = [
-  { id: 'h2o', formula: 'H\u2082O', name: 'Water \u00b7 hard base',   color: '#4FC3F7', points: 10, key: '1', hardness: 'hard'       },
-  { id: 'nh3', formula: 'NH\u2083',  name: 'Ammonia \u00b7 borderline', color: '#81C784', points: 15, key: '2', hardness: 'borderline' },
-  { id: 'cl',  formula: 'Cl\u207B',  name: 'Chloride \u00b7 hard base',  color: '#FFD54F', points: 10, key: '3', hardness: 'hard'       },
-  { id: 'en',  formula: 'en',        name: 'Ethylenediamine \u00b7 soft', color: '#BA68C8', points: 25, key: '4', hardness: 'soft'    },
-  { id: 'cn',  formula: 'CN\u207B',  name: 'Cyanide \u00b7 soft base',   color: '#E57373', points: 40, key: '5', hardness: 'soft'       }
+  {id:'h2o',formula:'H₂O',name:'Water · hard · restores compute',color:'#4FC3F7',points:0,bonus:0,duration:650,slots:1,key:'1',hardness:'hard'},
+  {id:'nh3',formula:'NH₃',name:'Ammonia · borderline · fast',color:'#81C784',points:0,bonus:2,duration:500,slots:1,key:'2',hardness:'borderline'},
+  {id:'cl',formula:'Cl⁻',name:'Chloride · hard · second chance',color:'#FFD54F',points:0,bonus:1,duration:750,slots:1,key:'3',hardness:'hard'},
+  {id:'en',formula:'en',name:'Chelate · soft · two positions',color:'#BA68C8',points:0,bonus:2,duration:950,slots:2,key:'4',hardness:'soft'},
+  {id:'cn',formula:'CN⁻',name:'Cyanide · soft · quality bonus',color:'#E57373',points:0,bonus:6,duration:800,slots:1,key:'5',hardness:'soft'}
 ];
 
 var NI_TYPE_COLORS = { hard: '#00ff88', soft: '#ff88ff', borderline: '#ffdd44' };
@@ -1247,19 +1322,136 @@ var HSAB_MATCH = {
 };
 
 var ACHIEVEMENTS = [
-  { id: 'first_complex',   icon: '\u25C6', name: 'Geometry Optimized',    desc: 'Complete your first nickel complex' },
-  { id: 'ten_complexes',   icon: '\u25CF', name: 'SCF Converged',         desc: 'Complete 10 complexes' },
-  { id: 'homoleptic',      icon: '\u25B2', name: 'Homoleptic Hero',       desc: 'Form a complex with 6 identical ligands' },
-  { id: 'low_spin',        icon: '\u25A0', name: 'Low Spin Champion',     desc: 'Homoleptic complex with strong-field ligands only' },
-  { id: 'high_spin',       icon: '\u2605', name: 'High Spin Master',      desc: 'Homoleptic complex with weak-field ligands only' },
-  { id: 'chelate',         icon: '\u2665', name: 'Chelate Effect',        desc: 'Use ethylenediamine (en) in a complex' },
-  { id: 'level_5',         icon: '\u2726', name: 'Crystal Field Master',  desc: 'Reach level 5' },
-  { id: 'dft_10',          icon: '\u25C8', name: 'DFT Wizard',            desc: 'Run 10 DFT calculations' },
-  { id: 'hindex_10',       icon: '\u25CE', name: 'h-index 10',            desc: 'Reach an h-index of 10' },
-  { id: 'fifty_complexes', icon: '\u2727', name: 'Nickel Nobel',          desc: 'Complete 50 complexes' },
-  { id: 'ts_first', icon: '\u2021', name: 'Saddle Point Found', desc: 'Stabilize your first transition state' },
-  { id: 'ts_five',  icon: '\u25C9', name: 'Reaction Pathway Mapped', desc: 'Stabilize 5 transition states' },
-  { id: 'ts_ten',   icon: '\u273A', name: 'TS Expert', desc: 'Stabilize 10 transition states' }
+  {
+    "id": "first_complex",
+    "icon": "◆",
+    "name": "Geometry Optimized",
+    "desc": "Complete your first complex",
+    "metric": "complexes",
+    "target": 1
+  },
+  {
+    "id": "ten_complexes",
+    "icon": "●",
+    "name": "SCF Converged",
+    "desc": "Complete 10 complexes across your career",
+    "metric": "complexes",
+    "target": 10
+  },
+  {
+    "id": "fifty_complexes",
+    "icon": "✧",
+    "name": "Nickel Nobel",
+    "desc": "Complete 50 complexes across your career",
+    "metric": "complexes",
+    "target": 50
+  },
+  {
+    "id": "homoleptic",
+    "icon": "▲",
+    "name": "Homoleptic Hero",
+    "desc": "Publish a complex with six identical ligands"
+  },
+  {
+    "id": "chelate",
+    "icon": "♥",
+    "name": "Chelate Effect",
+    "desc": "Publish a complex containing en"
+  },
+  {
+    "id": "first_paper",
+    "icon": "▣",
+    "name": "Peer Reviewed",
+    "desc": "Publish your first research project",
+    "metric": "projects",
+    "target": 1
+  },
+  {
+    "id": "hindex_10",
+    "icon": "◎",
+    "name": "h-index 10",
+    "desc": "Publish 10 projects across your career",
+    "metric": "projects",
+    "target": 10
+  },
+  {
+    "id": "level_5",
+    "icon": "✦",
+    "name": "Principal Investigator",
+    "desc": "Reach project 5 in one run"
+  },
+  {
+    "id": "dft_10",
+    "icon": "◈",
+    "name": "DFT Wizard",
+    "desc": "Run 10 DFT calculations across your career",
+    "metric": "dft",
+    "target": 10
+  },
+  {
+    "id": "dft_marathon",
+    "icon": "✷",
+    "name": "Cluster Marathon",
+    "desc": "Run 10 DFT calculations in one run"
+  },
+  {
+    "id": "ts_first",
+    "icon": "‡",
+    "name": "Saddle Point Found",
+    "desc": "Stabilize your first saddle point",
+    "metric": "ts",
+    "target": 1
+  },
+  {
+    "id": "ts_five",
+    "icon": "◉",
+    "name": "Reaction Pathway Mapped",
+    "desc": "Verify five saddle points across your career",
+    "metric": "ts",
+    "target": 5
+  },
+  {
+    "id": "ts_ten",
+    "icon": "✺",
+    "name": "Pathway Expert",
+    "desc": "Verify 10 saddle points across your career",
+    "metric": "ts",
+    "target": 10
+  },
+  {
+    "id": "clean_project",
+    "icon": "✓",
+    "name": "No Imaginary Frequencies",
+    "desc": "Publish a project without losing a complex"
+  },
+  {
+    "id": "xtb_project",
+    "icon": "⚡",
+    "name": "Cheap and Cheerful",
+    "desc": "Publish a project using only xTB"
+  },
+  {
+    "id": "benchmark_first",
+    "icon": "◇",
+    "name": "Trust, but Verify",
+    "desc": "Benchmark a result with DFT or finish a benchmark encounter",
+    "metric": "benchmarks",
+    "target": 1
+  },
+  {
+    "id": "uma_checked",
+    "icon": "◐",
+    "name": "Outside the Training Set",
+    "desc": "Manually check an unusual UMA result",
+    "metric": "umaChecks",
+    "target": 1
+  },
+  {
+    "id": "last_grant",
+    "icon": "★",
+    "name": "Publish or Perish",
+    "desc": "Publish a project after reaching your last grant"
+  }
 ];
 
 var HENRY_QUOTES = [
@@ -1333,6 +1525,8 @@ var HENRY_GAMEOVER_LINES = [
 /* ============================================================
    STATE
 ============================================================ */
+var careerLocal={},careerOther={};
+try { var savedCareer=JSON.parse(localStorage.getItem('henrysLabV5Career')||'{}');careerLocal=savedCareer.local||{};careerOther=savedCareer.other||{}; } catch(e) {}
 var state = 'title'; // title | playing | gameover
 var paused = false;
 var score = 0, level = 1, lives = 3, complexesCompleted = 0, hIndex = 0;
@@ -1353,7 +1547,7 @@ var canvas, ctx;
 
 try {
   var savedPlayer = loadIdentity();
-  highScore = savedPlayer && savedPlayer.linkedState ? savedPlayer.linkedState.highScore : (parseInt(localStorage.getItem('henrysNickelQuestHS') || '0', 10) || 0);
+  highScore = savedPlayer && savedPlayer.linkedState ? savedPlayer.linkedState.highScore : (parseInt(localStorage.getItem('henrysLabV5HS') || '0', 10) || 0);
 } catch(e) { highScore = 0; }
 
 /* Shared boards are served by the hosted API. No shared credentials belong here. */
@@ -1362,6 +1556,7 @@ var LB_MAX_ENTRIES = 50;
 var pendingSubmitScore = 0;
 var onlineLeaderboardCache = null;
 var identity = loadIdentity();
+if(identity)careerLocal=identity.stats||{};
 var syncChain = Promise.resolve();
 var startAfterName = false;
 var connectingDevice = false;
@@ -1428,7 +1623,7 @@ function getLocalScores() {
   try {
     var savedPlayer = loadIdentity();
     if (savedPlayer && savedPlayer.linkedState) return savedPlayer.linkedState.scores || [];
-    var arr = JSON.parse(localStorage.getItem('henrysNickelQuestLB') || '[]');
+    var arr = JSON.parse(localStorage.getItem('henrysLabV5LB') || '[]');
     return Array.isArray(arr) ? arr : [];
   } catch(e) { return []; }
 }
@@ -1436,7 +1631,7 @@ function getLocalScores() {
 function saveLocalScore(entry) {
   var scores = mergeScores(getLocalScores(), entry);
   if (identity && identity.linkedState) { identity.linkedState.scores = scores; persistIdentity(); }
-  try { localStorage.setItem('henrysNickelQuestLB', JSON.stringify(scores)); } catch(e) {}
+  try { localStorage.setItem('henrysLabV5LB', JSON.stringify(scores)); } catch(e) {}
   return scores;
 }
 
@@ -1444,14 +1639,14 @@ function loadLocalAchievements() {
   try {
     var savedPlayer = loadIdentity();
     if (savedPlayer && savedPlayer.linkedState) return savedPlayer.linkedState.unlocks || {};
-    var obj = JSON.parse(localStorage.getItem('henrysNickelQuestAch') || '{}');
+    var obj = JSON.parse(localStorage.getItem('henrysLabV5Ach') || '{}');
     return (obj && typeof obj === 'object') ? obj : {};
   } catch(e) { return {}; }
 }
 
 function saveLocalAchievements() {
   if (identity && identity.linkedState) persistIdentity();
-  try { localStorage.setItem('henrysNickelQuestAch', JSON.stringify(unlockedAchievements)); } catch(e) {}
+  try { localStorage.setItem('henrysLabV5Ach', JSON.stringify(unlockedAchievements)); } catch(e) {}
 }
 
 function getLastPlayerName() {
@@ -1471,15 +1666,21 @@ function countUnlockedAchievements() {
 function loadIdentity() {
   try {
     var saved = JSON.parse(localStorage.getItem('henrysOnlineIdentity') || 'null');
-    return saved && /^[a-f0-9]{64}$/.test(saved.key) && typeof saved.name === 'string' ? saved : null;
+    if(!saved || !/^[a-f0-9]{64}$/.test(saved.key) || typeof saved.name!=='string')return null;
+    var v5=saved.v5 || {};
+    return {key:saved.key,name:saved.name,registered:saved.registered,best:v5.best||null,linkedState:v5.linkedState||null,stats:v5.stats||{}};
   } catch(e) { return null; }
 }
 function persistIdentity() {
-  if (identity && identity.linkedState) {
-    identity.linkedState.unlocks = unlockedAchievements;
-    identity.linkedState.highScore = highScore;
-  }
-  try { localStorage.setItem('henrysOnlineIdentity', JSON.stringify(identity)); } catch(e) {}
+  if(!identity)return;
+  if(identity.linkedState){identity.linkedState.unlocks=unlockedAchievements;identity.linkedState.highScore=highScore;}
+  try {
+    var stored=JSON.parse(localStorage.getItem('henrysOnlineIdentity')||'null');
+    if(!stored||stored.key!==identity.key)stored={key:identity.key,name:identity.name,registered:true};
+    stored.name=identity.name;stored.registered=identity.registered;
+    stored.v5={best:identity.best||null,linkedState:identity.linkedState||null,stats:careerLocal};
+    localStorage.setItem('henrysOnlineIdentity',JSON.stringify(stored));
+  } catch(e) {}
 }
 function api(path, body) {
   var controller = new AbortController();
@@ -1494,7 +1695,7 @@ function api(path, body) {
   }).finally(function() { clearTimeout(timer); });
 }
 function fetchOnlineLeaderboard() {
-  return api('/api/board').then(function(data) {
+  return api('/api/board?season=v5').then(function(data) {
     var board = normalizeLeaderboard(data);
     board.players = data.players || [];
     return board;
@@ -1505,17 +1706,20 @@ function syncProfile() {
   if (!identity) return Promise.resolve({ok:false, reason:'Enter your name first'});
   syncChain = syncChain.catch(function() {}).then(function() {
     var sent = JSON.parse(JSON.stringify(identity));
-    return api('/api/sync', { key: sent.key, name: sent.name, best: sent.best || null, unlocks: unlockedAchievements, rename: !!sent.renameRequested }).then(function(data) {
+    return api('/api/sync', { key: sent.key, name: sent.name, season:'v5', stats:careerLocal, best: sent.best || null, unlocks: unlockedAchievements, rename: !!sent.renameRequested }).then(function(data) {
       if (!identity || identity.key !== sent.key) return {ok:false,reason:'Player changed'};
       identity.name = data.name;
       delete identity.renameRequested;
+      Object.keys(data.deviceStats||{}).forEach(function(k){careerLocal[k]=Math.max(careerLocal[k]||0,data.deviceStats[k]);});
+      careerOther={};Object.keys(data.stats||{}).forEach(function(k){careerOther[k]=Math.max(0,data.stats[k]-(data.deviceStats && data.deviceStats[k] || 0));});
+      saveCareer();
       identity.registered = true;
       document.getElementById('title-player-btn').textContent = 'Player: ' + data.name;
       saveLastPlayerName(data.name);
       Object.keys(data.unlocks || {}).forEach(function(id) { unlockedAchievements[id] = data.unlocks[id]; });
       saveLocalAchievements();
       highScore = Math.max(highScore, data.best ? data.best.score : 0);
-      try { localStorage.setItem('henrysNickelQuestHS', String(highScore)); } catch(e) {}
+      try { localStorage.setItem('henrysLabV5HS', String(highScore)); } catch(e) {}
       document.getElementById('title-high-score').textContent = highScore.toLocaleString();
       persistIdentity();
       return {ok:true};
@@ -1615,6 +1819,7 @@ function renderAchievementsBoard() {
     card.appendChild(name);
     card.appendChild(desc);
     card.appendChild(date);
+    if(ach.metric){var progress=document.createElement('div');progress.className='achievement-counter';progress.textContent=Math.min(careerValue(ach.metric),ach.target)+' / '+ach.target;card.appendChild(progress);}
     grid.appendChild(card);
   });
   document.getElementById('ach-progress-label').textContent =
@@ -1706,7 +1911,7 @@ async function claimDeviceCode() {
   if (!connectionKey) connectionKey=randomDeviceKey();
   try {
     await syncChain.catch(function() {});
-    var data=await api('/api/device/claim',{key:connectionKey,code:code});
+    var data=await api('/api/device/claim',{key:connectionKey,code:code,season:'v5'});
     var nextIdentity={key:connectionKey,name:data.name,registered:true,best:data.best || null};
     var nextScores=data.best ? [data.best] : [];
     var nextHighScore=data.best ? data.best.score : 0;
@@ -1719,13 +1924,14 @@ async function claimDeviceCode() {
       } catch(error) {}
     }
     nextIdentity.linkedState={unlocks:data.unlocks || {},scores:nextScores,highScore:nextHighScore};
-    try { localStorage.setItem('henrysOnlineIdentity',JSON.stringify(nextIdentity)); }
+    try { localStorage.setItem('henrysOnlineIdentity',JSON.stringify({key:nextIdentity.key,name:nextIdentity.name,registered:true,v5:{best:nextIdentity.best,linkedState:nextIdentity.linkedState,stats:data.deviceStats||{}}})); }
     catch(error) { throw new Error('This browser could not remember your player. Allow browser storage, then try again with this code.'); }
     try {
-      localStorage.setItem('henrysNickelQuestAch',JSON.stringify(data.unlocks || {}));
-      localStorage.setItem('henrysNickelQuestLB',JSON.stringify(nextScores));
-      localStorage.setItem('henrysNickelQuestHS',String(nextHighScore));
+      localStorage.setItem('henrysLabV5Ach',JSON.stringify(data.unlocks || {}));
+      localStorage.setItem('henrysLabV5LB',JSON.stringify(nextScores));
+      localStorage.setItem('henrysLabV5HS',String(nextHighScore));
     } catch(error) {}
+    careerLocal=data.deviceStats||{};careerOther={};Object.keys(data.stats||{}).forEach(function(k){careerOther[k]=Math.max(0,data.stats[k]-(careerLocal[k]||0));});
     identity=nextIdentity;
     unlockedAchievements=data.unlocks || {};
     highScore=nextHighScore;
@@ -1734,6 +1940,7 @@ async function claimDeviceCode() {
     document.getElementById('device-code-wrap').classList.add('hidden');
     document.getElementById('device-create-msg').textContent='';
     saveLastPlayerName(data.name);
+    saveCareer();
     pendingSubmitScore=0; startAfterName=false;
     onlineLeaderboardCache=null;
     document.getElementById('title-player-btn').textContent='Player: '+identity.name;
@@ -1912,12 +2119,12 @@ NiIon.prototype.draw = function() {
   ctx.fillText('Ni\u00B2\u207A', this.x, this.y - 4);
 
   // Type label
-  ctx.font = 'bold 8px "JetBrains Mono", monospace';
+  ctx.font = 'bold 12px "JetBrains Mono", monospace';
   ctx.fillStyle = hexA(color, 0.7);
   ctx.fillText(NI_TYPE_NAMES[this.type], this.x, this.y + 11);
 
   // Ligand count
-  ctx.font = '9px "JetBrains Mono", monospace';
+  ctx.font = '11px "JetBrains Mono", monospace';
   ctx.fillStyle = this.ligands.length === MAX_LIGANDS ? '#00ff88' : hexA(color, 0.6);
   ctx.fillText(this.ligands.length + '/' + MAX_LIGANDS, this.x, this.y + r + 13);
 
@@ -2066,32 +2273,25 @@ function hexA(hex, alpha) {
 }
 function rand(a, b) { return a + Math.random() * (b - a); }
 
-function spawnNi() { niIons.push(new NiIon()); }
+function spawnNi() {
+  var ion=new NiIon(false);ion.id=lab.nextId++;ion.unusualCandidate=Math.random()<.45;ion.jobProgress=0;
+  niIons.push(ion);
+}
 
 function spawnTS() {
-  var ts = new NiIon(true);
-  ts.x = CANVAS_W / 2 + (Math.random() - 0.5) * 300;
-  niIons.push(ts);
+  var ion=new NiIon(true);ion.id=lab.nextId++;ion.x=CANVAS_W/2;ion.baseX=ion.x;ion.pathIndex=0;ion.lifeTime=0;
+  ion.encounterType=lab.project>=3 && Math.random()<.35?'benchmark':'ts';
+  ion.variant=lab.project>=4?'split':lab.project>=2?'wobble':'plain';ion.analyzed=false;ion.accepted=false;
+  niIons.push(ion);labMessage(ion.encounterType==='benchmark'?'Optional benchmark: follow the numbered path. Costs 15 compute; big paper bonus.':'Optional saddle point: follow the highlighted path, or use a frequency calculation.');
 }
 
 function stabilizeTS(ion) {
-  var pts = TS_BASE_POINTS * level;
-  score += pts;
-  tsStabilized++;
-
-  explode(ion.x, ion.y, [TS_COLOR, '#ffcc44', '#00ff88', '#ffffff'], 40);
-  ion.dead = true;
-
-  sfxTsConverged();
-  floatText('TS CONVERGED!', ion.x, ion.y - 55, '#00ff88');
-  floatText('+' + pts, ion.x, ion.y - 75, TS_COLOR);
-  showHenryQuote('Saddle point located!');
-
-  if (tsStabilized === 1)  checkAchievement('ts_first');
-  if (tsStabilized === 5)  checkAchievement('ts_five');
-  if (tsStabilized === 10) checkAchievement('ts_ten');
-
-  updateUI();
+  if(ion.dead)return;
+  var pts=(ion.encounterType==='benchmark'?500:250)+lab.project*25;
+  score+=pts;tsStabilized++;lab.compute=Math.min(lab.maxCompute,lab.compute+12);ion.dead=true;
+  bumpCareer('ts');
+  if(ion.encounterType==='benchmark'){lab.benchmarks++;bumpCareer('benchmarks');}
+  sfxTsConverged();explode(ion.x,ion.y,[TS_COLOR,'#ffffff'],22);floatText('+'+pts+' · verified',ion.x,ion.y-45,TS_COLOR);updateUI();
 }
 
 function explode(x, y, colors, count) {
@@ -2106,168 +2306,77 @@ function floatText(text, x, y, color) {
 }
 
 function calcComplexScore(ion) {
-  var base = 0, cfse = 0, hsab = 0, homoleptic = 0;
-  var counts = {};
-  for (var i = 0; i < ion.ligands.length; i++) {
-    var idx = ion.ligands[i];
-    counts[idx] = (counts[idx] || 0) + 1;
-    base += LIGANDS[idx].points;
-  }
-  // CFSE: strong-field ligands (en=3, cn=4)
-  var strongCount = (counts[3] || 0) + (counts[4] || 0);
-  cfse = strongCount * 20;
-  // HSAB match
-  for (var j = 0; j < ion.ligands.length; j++) {
-    var lig = LIGANDS[ion.ligands[j]];
-    if (HSAB_MATCH[ion.type] && HSAB_MATCH[ion.type].indexOf(lig.id) !== -1) {
-      hsab += 15;
-    }
-  }
-  // Homoleptic
-  var keys = Object.keys(counts);
-  if (keys.length === 1) {
-    homoleptic = 100;
-    checkAchievement('homoleptic');
-    var only = ion.ligands[0];
-    if (only === 3 || only === 4) checkAchievement('low_spin');
-    if (only === 0 || only === 2) checkAchievement('high_spin');
-  }
-  // Chelate
-  if (ion.ligands.indexOf(3) !== -1) checkAchievement('chelate');
-
-  return Math.round((base + cfse + hsab + homoleptic + 50) * level);
+  var matched=ion.ligands.filter(function(idx){return HSAB_MATCH[ion.type].indexOf(LIGANDS[idx].id)!==-1;}).length;
+  var same=ion.ligands.every(function(idx){return idx===ion.ligands[0];});
+  var ligandBonus=ion.ligands.reduce(function(sum,idx){return sum+LIGANDS[idx].bonus;},0);
+  var method=METHODS.find(function(m){return m.id===(ion.method || 'xtb');});
+  return Math.round((100+matched*20+ligandBonus+(same?30:0)+(ion.qualityBonus||0))*method.multiplier*(1+Math.min(lab.project-1,10)*.06));
 }
 
 function completeComplex(ion) {
-  var pts = calcComplexScore(ion);
-  score += pts;
-  complexesCompleted++;
-  hIndex = Math.floor(complexesCompleted / 5);
-
-  var colors = ion.ligands.map(function(idx){ return LIGANDS[idx].color; });
-  colors.push(NI_TYPE_COLORS[ion.type]);
-  explode(ion.x, ion.y, colors, 32);
-  ion.dead = true;
-
-  sfxComplete();
-  floatText('+' + pts, ion.x, ion.y - 45, '#00ff88');
-  floatText('Complex!', ion.x, ion.y - 65, NI_TYPE_COLORS[ion.type]);
-
-  if (complexesCompleted === 1)  checkAchievement('first_complex');
-  if (complexesCompleted === 10) checkAchievement('ten_complexes');
-  if (complexesCompleted === 50) checkAchievement('fifty_complexes');
-  if (hIndex >= 10) checkAchievement('hindex_10');
-
-  var newLevel = Math.floor(complexesCompleted / 5) + 1;
-  if (newLevel > level) {
-    level = newLevel;
-    sfxLevelUp();
-    floatText('LEVEL ' + level + '!', CANVAS_W / 2, CANVAS_H / 2, '#00d4ff');
-    spawnInterval = Math.max(800, 3000 - (level - 1) * 250);
-    fallSpeed = 1.0 + (level - 1) * 0.12;
-    if (level === 5) checkAchievement('level_5');
-  }
-
+  if(ion.dead || state!=='playing') return;
+  var pts=calcComplexScore(ion);score+=pts;complexesCompleted++;lab.completed++;
+  var matched=ion.ligands.filter(function(idx){return HSAB_MATCH[ion.type].indexOf(LIGANDS[idx].id)!==-1;}).length;
+  if(matched>=5)lab.matchedCompleted=(lab.matchedCompleted||0)+1;
+  lab.methods[ion.method||'xtb']=true;
+  ion.ligands.forEach(function(idx){lab.families[LIGANDS[idx].hardness]=true;});
+  if(ion.ligands.every(function(idx){return idx===ion.ligands[0];}))checkAchievement('homoleptic');
+  if(ion.ligands.indexOf(3)!==-1)checkAchievement('chelate');
+  if(ion.method==='dft'&&!ion.dftCounted)recordDFT();
+  if(ion.method==='uma')lab.lastUMA={points:pts,benchmarked:!!ion.qualityBonus};
+  lab.compute=Math.min(lab.maxCompute,lab.compute+6+(ion.ligands.indexOf(0)!==-1?6:0));
+  ion.dead=true;bumpCareer('complexes');sfxComplete();
+  explode(ion.x,ion.y,[NI_TYPE_COLORS[ion.type],'#00ff88','#ffffff'],18);floatText('+'+pts+' · published',ion.x,ion.y-40,'#00ff88');
+  if(lab.selected===ion.id)lab.selected=null;
   updateUI();
+  if(lab.completed>=lab.target)publishProject();
 }
 
 /* ============================================================
    UPDATE
 ============================================================ */
 function update(delta) {
-  if (state !== 'playing' || paused || dftActive) return;
-
-  // Spawn
-  spawnTimer += delta * 16.67;
-  if (spawnTimer >= spawnInterval) {
-    spawnTimer = 0;
-    spawnNi();
-  }
-
-  // TS spawn timer
-  tsSpawnTimer += delta * 16.67;
-  if (tsSpawnTimer >= tsSpawnInterval) {
-    var hasTS = false;
-    for (var t = 0; t < niIons.length; t++) {
-      if (niIons[t].isTS && !niIons[t].dead) { hasTS = true; break; }
+  if(state!=='playing' || paused) return;
+  var ms=delta*16.67;lab.clock+=ms;lab.compute=Math.min(lab.maxCompute,lab.compute+lab.regen*ms/1000);lab.slow=Math.max(0,lab.slow-ms);lab.calcCooldown=Math.max(0,lab.calcCooldown-ms);
+  var progress=lab.completed/lab.target;
+  spawnInterval=Math.max(2700,4500-Math.min(lab.project-1,10)*120-progress*250);
+  fallSpeed=.50+Math.min(lab.project-1,10)*.022+progress*.065;
+  spawnTimer+=ms;
+  var regular=niIons.filter(function(ion){return !ion.isTS && !ion.dead;});
+  if(spawnTimer>=spawnInterval && regular.length<Math.min(6,lab.project<3?3:4+Math.floor(lab.project/4))){spawnTimer=0;spawnNi();}
+  lab.encounterTimer-=ms;
+  if(lab.encounterTimer<=0 && !niIons.some(function(ion){return ion.isTS&&!ion.dead;})){spawnTS();lab.encounterTimer=24000+Math.random()*9000;}
+  var jobs=niIons.filter(function(ion){return !ion.dead&&!ion.isTS&&ion.method&&!ion.verify;}).sort(function(a,b){if(a.id===lab.selected)return -1;if(b.id===lab.selected)return 1;return b.y-a.y;});
+  niIons.forEach(function(ion){ion.running=false;});
+  jobs.slice(0,lab.cores).forEach(function(ion){
+    if(state!=='playing')return;
+    ion.running=true;
+    var lig=LIGANDS[ion.jobLigand],method=METHODS.find(function(m){return m.id===ion.method;});
+    var match=HSAB_MATCH[ion.type].indexOf(lig.id)!==-1;
+    ion.jobProgress+=ms;
+    var duration=(match?lig.duration:lig.duration*1.75)*method.duration;
+    if(ion.jobProgress>=duration){ion.jobProgress-=duration;for(var n=0;n<lig.slots && ion.ligands.length<6;n++)ion.ligands.push(ion.jobLigand);sfxCoordinate();
+      if(ion.ligands.length>=6){if(ion.unusual){ion.verify=true;ion.umaReviewed=true;labMessage('UMA flagged an unusual geometry. Tap the amber result to check it, or benchmark it with a single-point calculation.');}else completeComplex(ion);}
     }
-    if (!hasTS && niIons.length < 6) {
-      tsSpawnTimer = 0;
-      tsSpawnInterval = rand(TS_SPAWN_MIN, TS_SPAWN_MAX);
-      spawnTS();
-      sfxTsAppear();
-      floatText('TS INCOMING!', CANVAS_W / 2, 60, TS_COLOR);
-    } else {
-      tsSpawnTimer = tsSpawnInterval * 0.9;
-    }
-  }
-
-  // Ni ions
-  for (var i = niIons.length - 1; i >= 0; i--) {
-    var ion = niIons[i];
-    ion.update(delta);
-    if (ion.y > CANVAS_H + 50 && !ion.dead) {
-      ion.dead = true;
-      if (ion.isTS) {
-        var penalty = TS_MISS_PENALTY * level;
-        score = Math.max(0, score - penalty);
-        shakeIntensity = 8;
-        sfxTsDecomposed();
-        floatText('TS DECOMPOSED', ion.x, CANVAS_H - 30, '#ff4444');
-        floatText('-' + penalty, ion.x, CANVAS_H - 50, '#ff4444');
-        explode(ion.x, Math.min(ion.y, CANVAS_H - 20), ['#ff4444', '#ff8844', TS_COLOR], 25);
-        showHenryQuote('Don\u2019t let it decompose!');
-        updateUI();
-      } else {
-        lives--;
-        shakeIntensity = 12;
-        sfxLoseLife();
-        floatText('LOST!', ion.x, CANVAS_H - 30, '#ff4444');
-        explode(ion.x, Math.min(ion.y, CANVAS_H - 20), ['#ff4444', '#ff8844'], 18);
-        updateUI();
-        if (lives <= 0) { gameOver(); return; }
+  });
+  if(state!=='playing')return;
+  for(var i=niIons.length-1;i>=0;i--){var ion=niIons[i];if(ion.dead)continue;ion.update(delta);
+    if(!ion.isTS && lab.coffee && !lab.coffeeUsed && ion.y>CANVAS_H*.78){lab.coffeeUsed=true;lab.slow=6500;labMessage('Emergency coffee! The lab slows down for a breather.');}
+    if(ion.y>CANVAS_H+50){ion.dead=true;
+      if(!ion.isTS){
+        if(lab.checkpointLeft>0 || ion.ligands.indexOf(2)!==-1 && !ion.chlorideSaved){if(lab.checkpointLeft>0)lab.checkpointLeft--;else ion.chlorideSaved=true;ion.dead=false;ion.y=CANVAS_H*.25;labMessage('Checkpoint restored. Your job gets another chance.');continue;}
+        lives--;lab.misses++;lab.clean=false;if(lives===1)lab.lastGrant=true;
+        if(lab.consultant)lab.compute=Math.min(lab.maxCompute,lab.compute+15);
+        shakeIntensity=5;sfxLoseLife();floatText('Grant lost',ion.x,CANVAS_H-30,'#ff6b6b');if(lives<=0){gameOver();return;}
       }
     }
   }
-  niIons = niIons.filter(function(ion){ return !ion.dead; });
-
-  // Particles
-  for (var p = particles.length - 1; p >= 0; p--) {
-    particles[p].update(delta);
-    if (particles[p].life <= 0) particles.splice(p, 1);
-  }
-
-  // Floating texts
-  for (var f = floatingTexts.length - 1; f >= 0; f--) {
-    var ft = floatingTexts[f];
-    ft.y += ft.vy;
-    ft.life -= 0.014;
-    if (ft.life <= 0) floatingTexts.splice(f, 1);
-  }
-
-  // DFT cooldown
-  if (dftCooldown > 0) {
-    dftCooldown -= delta * 16.67;
-    if (dftCooldown < 0) dftCooldown = 0;
-    updateDftBtn();
-  }
-
-  // Shake decay
-  if (shakeIntensity > 0) shakeIntensity *= 0.85;
-
-  // Henry quotes
-  henryQuoteTimer += delta * 16.67;
-  if (henryQuoteTimer > 9000 && niIons.length > 0) {
-    henryQuoteTimer = 0;
-    showHenryQuote(HENRY_QUOTES[Math.floor(Math.random() * HENRY_QUOTES.length)]);
-  }
-
-  // BG dots
-  for (var d = 0; d < bgDots.length; d++) {
-    var dot = bgDots[d];
-    dot.y -= dot.speed * delta * 0.5;
-    if (dot.y < -10) { dot.y = CANVAS_H + 10; dot.x = Math.random() * CANVAS_W; }
-  }
+  niIons=niIons.filter(function(ion){return !ion.dead;});
+  particles.forEach(function(p){p.update(delta);});particles=particles.filter(function(p){return p.life>0;});
+  floatingTexts.forEach(function(ft){ft.y-=.4*delta;ft.life-=.012*delta;});floatingTexts=floatingTexts.filter(function(ft){return ft.life>0;});
+  shakeIntensity*=.85;
+  bgDots.forEach(function(dot){dot.y-=dot.speed*delta;if(dot.y<-10)dot.y=CANVAS_H+10;});
+  updateUI();
 }
 
 /* ============================================================
@@ -2400,40 +2509,17 @@ function canvasCoords(clientX, clientY) {
   return { x: (clientX - rect.left) * sx, y: (clientY - rect.top) * sy };
 }
 
-function handleTap(clientX, clientY) {
-  if (state !== 'playing' || paused || dftActive) return;
-  var c = canvasCoords(clientX, clientY);
-  mouseX = c.x; mouseY = c.y;
-
-  for (var i = niIons.length - 1; i >= 0; i--) {
-    var ion = niIons[i];
-    if (ion.contains(c.x, c.y)) {
-      if (ion.isTS) {
-        ion.tsProgress += TS_CLICK_PROGRESS;
-        sfxTsClick();
-        explode(ion.x, ion.y, [TS_COLOR, '#ffcc44'], 6);
-        floatText('+' + TS_CLICK_PROGRESS + '%', ion.x, ion.y - 55, TS_COLOR);
-        if (ion.tsProgress >= 100) stabilizeTS(ion);
-        updateUI();
-        break;
+function handleTap(clientX,clientY) {
+  if(state!=='playing'||paused)return;
+  var c=canvasCoords(clientX,clientY);mouseX=c.x;mouseY=c.y;
+  for(var i=niIons.length-1;i>=0;i--){var ion=niIons[i];if(ion.dead)continue;
+    if(ion.isTS){var nodes=encounterNodes(ion),target=nodes[ion.pathIndex];
+      if(Math.hypot(c.x-target.x,c.y-target.y)<=32){lab.selected=ion.id;
+        if(ion.encounterType==='benchmark'&&!ion.accepted){if(lab.compute<15){labMessage('Benchmark needs 15 compute. You can let this optional encounter pass.');return;}lab.compute-=15;ion.accepted=true;}
+        ion.pathIndex++;sfxTsClick();if(ion.pathIndex>=3)stabilizeTS(ion);else labMessage('Follow the next highlighted node.');return;
       }
-      if (ion.addLigand(selectedLigand)) {
-        sfxCoordinate();
-        var lig = LIGANDS[selectedLigand];
-        score += lig.points * level;
-        var pos = ion.ligandPos(ion.ligands.length - 1);
-        explode(pos.x, pos.y, [lig.color], 5);
-
-        // HSAB feedback
-        if (HSAB_MATCH[ion.type] && HSAB_MATCH[ion.type].indexOf(lig.id) !== -1) {
-          floatText('HSAB +15', ion.x, ion.y - 80, '#00ff88');
-        }
-
-        if (ion.isComplete()) completeComplex(ion);
-        updateUI();
-      }
-      break;
-    }
+      if(ion.contains(c.x,c.y)){lab.selected=ion.id;labMessage('Follow the glowing numbered path, or use Frequency.');return;}
+    }else if(ion.contains(c.x,c.y)){assignJob(ion);return;}
   }
 }
 
@@ -2448,6 +2534,7 @@ function setPaused(value) {
   document.getElementById('pause-overlay').classList.toggle('show', paused);
   document.getElementById('pause-btn').textContent = paused ? 'Resume' : 'Pause';
   document.getElementById('pause-btn').setAttribute('aria-pressed', String(paused));
+  updateUI();
 }
 
 function resizeGameCanvas() {
@@ -2455,7 +2542,7 @@ function resizeGameCanvas() {
   var rect = canvas.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
   var oldWidth = CANVAS_W, oldHeight = CANVAS_H;
-  CANVAS_W = compactLayout.matches && rect.height > rect.width ? 480 : 800;
+  CANVAS_W = compactLayout.matches && (window.innerHeight || rect.height) > (window.innerWidth || rect.width) ? 480 : 800;
   CANVAS_H = compactLayout.matches ? Math.round(CANVAS_W * rect.height / rect.width) : 500;
   var pixelRatio = Math.min(window.devicePixelRatio || 1, 3);
   canvas.width = Math.round(rect.width * pixelRatio);
@@ -2464,6 +2551,7 @@ function resizeGameCanvas() {
   niIons.forEach(function(ion) {
     ion.x = Math.max(60, Math.min(CANVAS_W - 60, ion.x * CANVAS_W / oldWidth));
     if (ion.y > 0) ion.y = ion.y * CANVAS_H / oldHeight;
+    if(ion.isTS){ion.baseX=CANVAS_W/2;ion.x=ion.baseX;}
   });
   particles = []; floatingTexts = [];
   initBgDots();
@@ -2472,7 +2560,7 @@ function resizeGameCanvas() {
 function handleKey(e) {
   if (e.key === 'Escape') {
     var openModalEl = document.querySelector('.modal-overlay:not(.hidden)');
-    if (openModalEl) closeModalEl(openModalEl);
+    if (openModalEl && !openModalEl.hasAttribute('data-required')) closeModalEl(openModalEl);
     return;
   }
   if (state !== 'playing') return;
@@ -2493,11 +2581,18 @@ function handleKey(e) {
    UI
 ============================================================ */
 function updateUI() {
-  document.getElementById('score').textContent = score.toLocaleString();
-  document.getElementById('level').textContent = level;
-  document.getElementById('lives').textContent = Math.max(0, lives);
-  document.getElementById('h-index').textContent = hIndex;
-  document.getElementById('ts-count').textContent = tsStabilized;
+  document.getElementById('score').textContent=score.toLocaleString();document.getElementById('level').textContent=level;
+  document.getElementById('lives').textContent=Math.max(0,lives);document.getElementById('h-index').textContent=hIndex;document.getElementById('ts-count').textContent=tsStabilized;
+  if(!lab)return;
+  document.getElementById('compute-value').textContent=Math.floor(lab.compute)+' / '+lab.maxCompute;
+  document.getElementById('compute-fill').style.width=(lab.compute/lab.maxCompute*100)+'%';
+  document.getElementById('project-progress').textContent=lab.brief?lab.completed+' / '+lab.target+' complexes · '+lab.brief.name:'Ready for research';
+  document.getElementById('cores-value').textContent=lab.cores+' core'+(lab.cores>1?'s':'');
+  var target=niIons.find(function(ion){return ion.id===lab.selected&&!ion.dead;});
+  document.getElementById('reassign-job-btn').classList.toggle('hidden',!(target&&!target.isTS&&target.method&&!target.verify));
+  document.getElementById('reassign-job-btn').disabled=paused;
+  document.getElementById('target-label').textContent=target?(target.isTS?'Selected: '+(target.encounterType==='benchmark'?'benchmark':'saddle point'):'Selected: '+NI_TYPE_NAMES[target.type]+' Ni · '+target.ligands.length+'/6 positions'):'Tap a complex to assign or prioritize a job';
+  document.querySelectorAll('[data-calculation]').forEach(function(b){var item=CALCULATIONS.find(function(c){return c.id===b.dataset.calculation;});b.disabled=paused||lab.compute<item.cost||lab.calcCooldown>0;});
 }
 
 function updateLigandBar() {
@@ -2509,14 +2604,8 @@ function updateLigandBar() {
 }
 
 function updateDftBtn() {
-  var btn = document.getElementById('dft-btn');
-  if (dftCooldown > 0) {
-    btn.disabled = true;
-    btn.textContent = 'DFT (' + Math.ceil(dftCooldown / 1000) + 's)';
-  } else {
-    btn.disabled = false;
-    btn.textContent = 'Run DFT';
-  }
+  document.getElementById('dft-btn').textContent='Calculate';
+  document.getElementById('dft-btn').disabled=false;
 }
 
 function showHenryQuote(text) {
@@ -2564,89 +2653,13 @@ function checkAchievement(id) {
    DFT ABILITY
 ============================================================ */
 function runDFT() {
-  if (dftCooldown > 0 || dftActive || state !== 'playing' || paused) return;
-  initAudio();
-  sfxDft();
-  dftActive = true;
-  dftProgress = 0;
-  dftTimesUsed++;
-  if (dftTimesUsed === 10) checkAchievement('dft_10');
-
-  var overlay = document.getElementById('dft-overlay');
-  overlay.classList.remove('hidden');
-
-  var steps = [
-    'Initializing basis set...',
-    'SCF iteration 1...',
-    'SCF iteration 2...',
-    'SCF iteration 3...',
-    'SCF iteration 4...',
-    'Geometry optimization...',
-    'Frequency calculation...',
-    'Analyzing wavefunction...',
-    'Converged!'
-  ];
-
-  dftIntervalId = setInterval(function() {
-    dftProgress += 2;
-    document.getElementById('dft-bar').style.width = dftProgress + '%';
-    var stepIdx = Math.min(Math.floor(dftProgress / 11), steps.length - 1);
-    document.getElementById('dft-text').textContent = steps[stepIdx];
-    if (dftProgress >= 100) {
-      clearInterval(dftIntervalId);
-      finishDFT();
-    }
-  }, 28);
+  if(state!=='playing')return;
+  var panel=document.getElementById('calculation-panel');panel.classList.toggle('hidden');
+  document.getElementById('dft-btn').setAttribute('aria-expanded',String(!panel.classList.contains('hidden')));
+  resizeGameCanvas();
 }
 
 function finishDFT() {
-  dftActive = false;
-  document.getElementById('dft-overlay').classList.add('hidden');
-  document.getElementById('dft-bar').style.width = '0%';
-
-  var outcomes = [
-    { label: 'SCF Converged!', fn: function() {
-      var bonus = 500 * level;
-      score += bonus;
-      floatText('+' + bonus + ' SCF!', CANVAS_W/2, 100, '#00ff88');
-    }},
-    { label: 'Geometry Optimized!', fn: function() {
-      for (var i = 0; i < niIons.length; i++) niIons[i].ligands = [];
-      floatText('Geometry Optimized!', CANVAS_W/2, 100, '#00d4ff');
-    }},
-    { label: 'Low Energy Found!', fn: function() {
-      slowTimeUntil = Date.now() + 5000;
-      floatText('Time Slowed!', CANVAS_W/2, 100, '#ff88ff');
-    }},
-    { label: 'Wavefunction Analyzed!', fn: function() {
-      var bonus = 300 * level;
-      score += bonus;
-      floatText('+' + bonus + ' Analysis!', CANVAS_W/2, 100, '#ffdd44');
-    }},
-    { label: 'TS Optimization Boost!', fn: function() {
-      var tsIon = null;
-      for (var i = 0; i < niIons.length; i++) {
-        if (niIons[i].isTS && !niIons[i].dead) { tsIon = niIons[i]; break; }
-      }
-      if (tsIon) {
-        tsIon.tsProgress = Math.min(100, tsIon.tsProgress + 50);
-        floatText('TS +50%!', tsIon.x, tsIon.y - 55, TS_COLOR);
-        explode(tsIon.x, tsIon.y, [TS_COLOR], 10);
-        if (tsIon.tsProgress >= 100) stabilizeTS(tsIon);
-      } else {
-        var bonus = 200 * level;
-        score += bonus;
-        floatText('+' + bonus + ' (no TS)', CANVAS_W/2, 100, '#00d4ff');
-      }
-    }}
-  ];
-
-  var outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
-  outcome.fn();
-  showHenryQuote(outcome.label);
-
-  dftCooldown = DFT_COOLDOWN_MAX;
-  updateDftBtn();
   updateUI();
 }
 
@@ -2654,37 +2667,14 @@ function finishDFT() {
    GAME FLOW
 ============================================================ */
 function startGame() {
-  state = 'playing';
-  document.body.classList.add('in-game');
-  setPaused(false);
-  score = 0; level = 1; lives = 3;
-  complexesCompleted = 0; hIndex = 0;
-  niIons = []; particles = []; floatingTexts = [];
-  selectedLigand = 0;
-  spawnTimer = spawnInterval; // spawn immediately
-  spawnInterval = 3000;
-  fallSpeed = 1.0;
-  dftCooldown = 0; dftTimesUsed = 0;
-  slowTimeUntil = 0;
-  shakeIntensity = 0;
-  henryQuoteTimer = 0;
-  mouseX = CANVAS_W / 2; mouseY = CANVAS_H / 2;
-  tsSpawnTimer = TS_SPAWN_FIRST * 0.8;
-  tsSpawnInterval = TS_SPAWN_FIRST;
-  tsStabilized = 0;
-
-  document.getElementById('title-screen').classList.add('hidden');
-  document.getElementById('game-over-screen').classList.add('hidden');
-  document.getElementById('game-screen').classList.remove('hidden');
-  document.getElementById('pause-overlay').classList.remove('show');
-
-  resizeGameCanvas();
-  updateUI();
-  updateLigandBar();
-  updateDftBtn();
-  initBgDots();
-
-  lastTime = performance.now();
+  state='playing';document.body.classList.add('in-game');paused=false;
+  score=0;level=1;lives=3;complexesCompleted=0;hIndex=0;dftTimesUsed=0;tsStabilized=0;lab=newLabRun();selectedLigand=0;selectedMethod='xtb';
+  niIons=[];particles=[];floatingTexts=[];slowTimeUntil=0;shakeIntensity=0;dftActive=false;
+  document.getElementById('title-screen').classList.add('hidden');document.getElementById('game-over-screen').classList.add('hidden');document.getElementById('game-screen').classList.remove('hidden');
+  document.getElementById('calculation-panel').classList.add('hidden');document.getElementById('dft-btn').setAttribute('aria-expanded','false');
+  document.getElementById('pause-overlay').classList.remove('show');document.getElementById('pause-btn').textContent='Pause';document.getElementById('pause-btn').setAttribute('aria-pressed','false');
+  document.getElementById('gameover-sync').textContent='';
+  resizeGameCanvas();updateLigandBar();updateMethodBar();updateDftBtn();initBgDots();beginProject();
 }
 
 function returnToMainMenu() {
@@ -2704,7 +2694,7 @@ function gameOver() {
   var isRecord = score > highScore && score > 0;
   if (isRecord) {
     highScore = score;
-    try { localStorage.setItem('henrysNickelQuestHS', String(highScore)); } catch(e) {}
+    try { localStorage.setItem('henrysLabV5HS', String(highScore)); } catch(e) {}
   }
 
   document.getElementById('final-score').textContent = score.toLocaleString();
@@ -2752,13 +2742,13 @@ function init() {
     var btn = document.createElement('button');
     btn.className = 'ligand-btn' + (i === 0 ? ' selected' : '');
     btn.style.setProperty('--ligand-color', lig.color);
-    btn.setAttribute('aria-label', lig.formula + ', ' + lig.name + ', ' + lig.points + ' points per ligand');
+    btn.setAttribute('aria-label', lig.formula + ', ' + lig.name + ', '+(lig.slots===2?'fills two positions':lig.name.split('·').pop()));
     btn.setAttribute('aria-pressed', String(i === selectedLigand));
     btn.innerHTML =
       '<span class="ligand-key">' + lig.key + '</span>' +
       '<span class="ligand-formula">' + lig.formula + '</span>' +
       '<span class="ligand-name">' + lig.name + '</span>' +
-      '<span class="ligand-pts">' + lig.points + ' pts<span class="per-ligand">/ligand</span></span>';
+      '<span class="ligand-pts">' + (lig.slots===2?'2 sites':lig.id==='h2o'?'+compute':lig.id==='cl'?'retry':lig.id==='cn'?'quality':'fast') + '</span>';
     btn.addEventListener('click', function() {
       if (state !== 'playing') return;
       selectedLigand = i;
@@ -2786,6 +2776,11 @@ function init() {
   document.addEventListener('visibilitychange', function() { if (document.hidden) setPaused(true); });
   document.getElementById('pause-btn').addEventListener('click', function() { setPaused(!paused); });
 
+  document.getElementById('reassign-job-btn').addEventListener('click',function(){var ion=niIons.find(function(x){return x.id===lab.selected&&!x.isTS&&!x.dead;});if(ion)assignJob(ion,true);});
+  document.getElementById('begin-project-btn').addEventListener('click',startProjectResearch);
+  document.getElementById('bank-run-btn').addEventListener('click',settleResearchRun);
+  document.querySelectorAll('[data-method]').forEach(function(b){b.addEventListener('click',function(){selectedMethod=b.dataset.method;updateMethodBar();});});
+  document.querySelectorAll('[data-calculation]').forEach(function(b){b.addEventListener('click',function(){performCalculation(b.dataset.calculation);});});
   // Keyboard
   document.addEventListener('keydown', handleKey);
 
@@ -2833,7 +2828,7 @@ function init() {
   var overlays = document.querySelectorAll('.modal-overlay');
   for (var oi = 0; oi < overlays.length; oi++) {
     overlays[oi].addEventListener('click', function(e) {
-      if (e.target === this) closeModalEl(this);
+      if (e.target === this && !this.hasAttribute('data-required')) closeModalEl(this);
     });
   }
 
@@ -2866,6 +2861,203 @@ function init() {
   initBgDots();
   requestAnimationFrame(loop);
 }
+
+
+function newLabRun() {
+  return {project:0,published:0,compute:60,maxCompute:100,cores:1,guess:0,checkpoint:0,insurance:false,coffee:false,consultant:false,regen:1.5,upgrades:[],completed:0,misses:0,methods:{},families:{},clean:true,lastGrant:false,lastUMA:null,selected:null,nextId:1,clock:0,encounterTimer:15000,calcCooldown:0,slow:0,checkpointLeft:0,coffeeUsed:false,projectStartScore:0,benchmarks:0,projectDFT:0};
+}
+
+function careerValue(metric) {
+  return (careerLocal[metric] || 0) + (careerOther[metric] || 0);
+}
+
+function bumpCareer(metric) {
+  careerLocal[metric]=(careerLocal[metric] || 0)+1;
+  saveCareer();
+  checkCareerAchievements();
+}
+
+function saveCareer() {
+  try { localStorage.setItem('henrysLabV5Career',JSON.stringify({local:careerLocal,other:careerOther})); } catch(e) {}
+  if (identity) persistIdentity();
+}
+
+function checkCareerAchievements() {
+  ACHIEVEMENTS.forEach(function(a) { if (a.metric && careerValue(a.metric)>=a.target) checkAchievement(a.id); });
+}
+
+function beginProject() {
+  lab.project++;
+  level=lab.project;
+  lab.completed=0;lab.matchedCompleted=0;lab.misses=0;lab.clean=true;lab.methods={};lab.families={};lab.benchmarks=0;lab.projectDFT=0;
+  lab.checkpointLeft=lab.checkpoint;lab.coffeeUsed=false;lab.selected=null;lab.projectStartScore=score;
+  lab.lastGrant=lives===1;
+  lab.target=Math.min(7,4+Math.floor((lab.project-1)/3));
+  var options=PROJECTS.filter(function(p) { return p.id!==lab.lastProject && (lab.project>1 || p.id==='screen'); });
+  lab.brief=options[Math.floor(Math.random()*options.length)];lab.lastProject=lab.brief.id;
+  lab.clock=0;lab.encounterTimer=lab.project===1 ? 16000 : 9000+Math.random()*4000;
+  lab.compute=Math.min(lab.maxCompute,lab.compute+12);
+  niIons=[];particles=[];floatingTexts=[];spawnTimer=99999;
+  document.getElementById('project-brief-title').textContent='Project '+lab.project+' · '+lab.brief.name;
+  document.getElementById('project-brief-copy').textContent=lab.brief.story;
+  document.getElementById('project-brief-goal').textContent='Publish '+lab.target+' completed complexes. Bonus: '+lab.brief.goal;
+  document.getElementById('project-brief-tip').textContent=lab.project===1 ? 'Choose a ligand and method, then tap a complex once. It coordinates automatically. Tap another job to prioritize it. Matching the label earns more.' : 'A matched ligand is faster. xTB screens cheaply; DFT improves quality; UMA is quick but may ask you to check an unusual result.';
+  state='briefing';paused=false;openModal('project-brief-modal');updateUI();
+}
+
+function startProjectResearch() {
+  if(state!=='briefing')return;
+  closeModalEl(document.getElementById('project-brief-modal'));
+  state='playing';setPaused(false);resizeGameCanvas();lastTime=performance.now();updateUI();
+}
+
+function projectBonusMet() {
+  var id=lab.brief.id;
+  if (id==='screen') return Object.keys(lab.families).length>=2;
+  if (id==='clean') return lab.clean;
+  if (id==='xtb') return lab.completed>0 && Object.keys(lab.methods).length===1 && !!lab.methods.xtb && lab.projectDFT===0;
+  if (id==='benchmark') return lab.benchmarks>0;
+  if (id==='match') return lab.matchedCompleted>=Math.ceil(lab.target*.75);
+  return false;
+}
+
+function publishProject() {
+  if (state!=='playing') return;
+  var bonusMet=projectBonusMet();
+  var reward=200+lab.project*40+(bonusMet?200:lab.insurance?100:0);
+  score+=reward;lab.published++;hIndex=lab.published;
+  bumpCareer('projects');
+  if(lab.clean) checkAchievement('clean_project');
+  if(Object.keys(lab.methods).length===1 && lab.methods.xtb && lab.projectDFT===0) checkAchievement('xtb_project');
+  if(lab.lastGrant) checkAchievement('last_grant');
+  if(lab.project>=5) checkAchievement('level_5');
+  lives=Math.min(5,lives+1);lab.compute=Math.min(lab.maxCompute,lab.compute+20);
+  state='review';niIons=[];lab.selected=null;
+  document.getElementById('review-title').textContent='Paper accepted! · Project '+lab.project;
+  document.getElementById('review-copy').textContent=lab.target+' complexes published. '+(bonusMet?'Bonus objective achieved!':lab.insurance?'Reviewer 2 insurance protected half your bonus.':'Bonus objective missed—your paper still counts.')+' +'+reward+' points. Funding renewed (up to five grants).';
+  document.getElementById('review-stats').textContent='Score '+score.toLocaleString()+' · '+lab.published+(lab.published===1?' paper · ':' papers · ')+dftTimesUsed+' calculations this run';
+  var choices=UPGRADES.filter(function(u){return lab.upgrades.filter(function(id){return id===u.id;}).length<u.max;});
+  for(var i=choices.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=choices[i];choices[i]=choices[j];choices[j]=tmp;}
+  var wrap=document.getElementById('upgrade-choices');wrap.innerHTML='';
+  choices.slice(0,3).forEach(function(u){var b=document.createElement('button');b.type='button';b.className='upgrade-card';var title=document.createElement('strong');title.textContent=u.name;var desc=document.createElement('span');desc.textContent=u.desc;b.appendChild(title);b.appendChild(desc);b.addEventListener('click',function(){chooseUpgrade(u.id);});wrap.appendChild(b);});
+  if(!choices.length){var b=document.createElement('button');b.textContent='Lab fully upgraded · next project';b.addEventListener('click',function(){chooseUpgrade(null);});wrap.appendChild(b);}
+  openModal('project-review-modal');updateUI();
+  if(identity) submitOnline({name:identity.name,score:score,level:level,achievements:countUnlockedAchievements(),date:new Date().toISOString()});
+}
+
+function chooseUpgrade(id) {
+  if(state!=='review') return;
+  if(id){var u=UPGRADES.find(function(x){return x.id===id;});if(!u || lab.upgrades.filter(function(x){return x===id;}).length>=u.max)return;lab.upgrades.push(id);u.apply();}
+  closeModalEl(document.getElementById('project-review-modal'));beginProject();
+}
+
+function settleResearchRun() {
+  if(state!=='review') return;
+  closeModalEl(document.getElementById('project-review-modal'));gameOver();
+}
+
+function assignJob(ion, reassign) {
+  lab.selected=ion.id;
+  if(ion.verify){ion.verify=false;bumpCareer('umaChecks');completeComplex(ion);return;}
+  if(ion.method&&!reassign){labMessage('Job prioritized. Use Reassign if you want to change its ligand or method.');updateUI();return;}
+  if(ion.method===selectedMethod && ion.jobLigand===selectedLigand) return;
+  var method=METHODS.find(function(m){return m.id===selectedMethod;});
+  if(lab.compute<method.cost){labMessage('Not enough compute. Try xTB, or let compute recharge.');return;}
+  lab.compute-=method.cost;ion.method=method.id;ion.jobLigand=selectedLigand;ion.jobProgress=0;
+  if(!ion.ligands.length && lab.guess){for(var i=0;i<lab.guess;i++)ion.ligands.push(selectedLigand);}
+  ion.unusual=method.id==='uma' && ion.type==='soft' && !ion.umaReviewed && ion.unusualCandidate;
+  labMessage(method.name+' job queued with '+LIGANDS[selectedLigand].formula+'. Tap a job to prioritize it.');updateUI();
+}
+
+function recordDFT() {
+  dftTimesUsed++;lab.projectDFT++;bumpCareer('dft');
+  if(dftTimesUsed>=10)checkAchievement('dft_marathon');
+}
+
+function encounterNodes(ion) {
+  var y=ion.y;
+  return [{x:ion.x-65,y:y+18},{x:ion.x,y:y-28},{x:ion.x+65,y:y+18}];
+}
+
+function performCalculation(kind) {
+  if(state!=='playing'||paused)return;
+  var item=CALCULATIONS.find(function(c){return c.id===kind;});
+  if(!item)return;
+  if(lab.calcCooldown>0){labMessage('Let this calculation finish settling.');return;}
+  if(lab.compute<item.cost){labMessage('Need '+item.cost+' compute. Try a free xTB job while it recharges.');return;}
+  var target=niIons.find(function(ion){return ion.id===lab.selected&&!ion.dead;});
+  var action;
+  if(kind==='geometry'){
+    if(!target||target.isTS){labMessage('Tap a nickel complex first, then choose Geometry.');return;}
+    action=function(){target.method=target.method||'xtb';target.jobLigand=target.jobLigand==null?selectedLigand:target.jobLigand;target.verify=false;target.dftCounted=true;while(target.ligands.length<6)target.ligands.push(target.jobLigand);target.unusual=false;completeComplex(target);};
+  }else if(kind==='frequency'){
+    if(!target||!target.isTS)target=niIons.find(function(ion){return ion.isTS&&!ion.dead;});
+    if(!target){labMessage('Frequency needs an active saddle point or benchmark.');return;}
+    if(target.analyzed){labMessage('The path is already revealed. Tap the final highlighted node.');return;}
+    action=function(){target.analyzed=true;target.pathIndex=2;lab.selected=target.id;labMessage('One imaginary frequency found. Tap the final highlighted node.');};
+  }else if(kind==='single'){
+    if(target&&!target.isTS&&!target.qualityBonus){action=function(){target.qualityBonus=70;if(target.verify){target.verify=false;target.unusual=false;lab.benchmarks++;bumpCareer('benchmarks');completeComplex(target);}else labMessage('Single point complete: this complex earns a quality bonus.');};}
+    else if(lab.lastUMA&&!lab.lastUMA.benchmarked){action=function(){lab.lastUMA.benchmarked=true;lab.benchmarks++;bumpCareer('benchmarks');score+=100+lab.project*20;labMessage('UMA result benchmarked with DFT. Trust, but verify.');};}
+    else {labMessage('Select an unbenchmarked complex, or finish a UMA result first.');return;}
+  }else action=function(){lab.slow=6500;labMessage('SCF rescued. Everything falls more slowly for 6.5 seconds.');};
+  lab.compute-=item.cost;lab.calcCooldown=1600;recordDFT();sfxDft();action();updateUI();
+}
+
+function labMessage(text) {
+  document.getElementById('lab-message').textContent=text;
+}
+
+function updateMethodBar() {
+  document.querySelectorAll('[data-method]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.method===selectedMethod));});
+}
+
+
+var METHODS=[
+  {id:'xtb',name:'xTB',cost:0,multiplier:.85,duration:.75},
+  {id:'dft',name:'DFT',cost:22,multiplier:1.3,duration:1},
+  {id:'uma',name:'UMA',cost:9,multiplier:1.08,duration:.6}
+];
+var CALCULATIONS=[{id:'geometry',name:'Geometry',cost:25},{id:'frequency',name:'Frequency',cost:15},{id:'single',name:'Single point',cost:15},{id:'rescue',name:'SCF rescue',cost:20}];
+var PROJECTS=[
+  {id:'screen',name:'Nickel catalyst screening',story:'A suspiciously optimistic supervisor wants a catalyst by Friday. Screen a small library and publish the useful results.',goal:'Use at least two ligand families.'},
+  {id:'clean',name:'Convergence clinic',story:'The cluster is quiet. The reviewers are not. Keep the calculations converging and avoid losing a grant.',goal:'Lose no complexes this project.'},
+  {id:'xtb',name:'Cheap and cheerful',story:'The compute budget has been replaced with a sticky note saying “be resourceful”. Fast screening is your friend.',goal:'Complete every complex using xTB.'},
+  {id:'benchmark',name:'Trust, but verify',story:'The machine-learning result looks wonderful. Almost too wonderful. Benchmark a UMA result before submitting the paper.',goal:'Benchmark a result or finish a benchmark encounter.'},
+  {id:'match',name:'Ligand field day',story:'Today the chemistry matters more than brute force. Read the hard, soft and borderline labels and choose a useful ligand.',goal:'Match at least 75% of your completed complexes.'}
+];
+var UPGRADES=[
+  {id:'cores',name:'More cores',desc:'Coordinate one additional job at a time.',max:2,apply:function(){lab.cores++;}},
+  {id:'guess',name:'Better initial guess',desc:'Newly assigned jobs start with one extra position filled.',max:2,apply:function(){lab.guess++;}},
+  {id:'checkpoint',name:'Checkpoint files',desc:'Rescue one extra falling complex each project.',max:2,apply:function(){lab.checkpoint++;}},
+  {id:'insurance',name:'Reviewer 2 insurance',desc:'Keep half the objective bonus when a bonus is missed.',max:1,apply:function(){lab.insurance=true;}},
+  {id:'coffee',name:'Emergency coffee',desc:'Automatically slow the lab when a complex first reaches danger.',max:1,apply:function(){lab.coffee=true;}},
+  {id:'consultant',name:'Convergence consultant',desc:'Failed jobs return 15 compute.',max:1,apply:function(){lab.consultant=true;}},
+  {id:'cluster',name:'Cluster allocation',desc:'Add 20 maximum compute and improve its recharge rate.',max:2,apply:function(){lab.maxCompute+=20;lab.regen+=.7;}},
+  {id:'funding',name:'Renewed funding',desc:'Recover two extra grants, up to a maximum of five.',max:3,apply:function(){lives=Math.min(5,lives+2);}}
+];
+var lab=newLabRun(),selectedMethod='xtb';
+lab.matchedCompleted=0;
+NiIon.prototype.update=function(delta){
+  var slow=lab.slow>0?.35:1;
+  var water=this.running&&this.jobLigand===0?.65:1;
+  this.y+=fallSpeed*delta*slow*water*(this.isTS?1.05:1)*(CANVAS_H/500);this.wobble+=delta*.002;this.pulse+=delta*.006;
+  if(this.isTS){this.lifeTime+=delta*16.67;if(this.variant!=='plain')this.x=this.baseX+Math.sin(this.lifeTime/900)*Math.min(55,CANVAS_W*.1);}
+};
+var drawOriginalNi=NiIon.prototype.draw;
+NiIon.prototype.draw=function(){
+  drawOriginalNi.call(this);if(this.isTS)return;
+  ctx.save();ctx.textAlign='center';ctx.font='bold 11px "JetBrains Mono", monospace';ctx.fillStyle=this.verify?'#ffaa00':this.running?'#00ff88':'#8292ac';
+  ctx.fillText(this.verify?'UMA · tap to verify':this.method?this.method.toUpperCase()+(this.running?' · running':' · queued'):'tap to assign',this.x,this.y+65);
+  if(lab.selected===this.id){ctx.strokeStyle='#00d4ff';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.arc(this.x,this.y,60,0,Math.PI*2);ctx.stroke();}
+  ctx.restore();
+};
+NiIon.prototype.drawTS=function(){
+  var nodes=encounterNodes(this);ctx.save();ctx.strokeStyle='rgba(255,170,0,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(nodes[0].x,nodes[0].y);ctx.quadraticCurveTo(this.x,this.y-65,nodes[2].x,nodes[2].y);ctx.stroke();
+  ctx.textAlign='center';ctx.font='bold 11px "JetBrains Mono",monospace';ctx.fillStyle='#ffaa00';ctx.fillText(this.encounterType==='benchmark'?'OPTIONAL BENCHMARK · 15 compute':'SADDLE POINT · follow the path',this.x,this.y-75);
+  nodes.forEach(function(node,i){ctx.fillStyle=i<this.pathIndex?'#00ff88':i===this.pathIndex?'#ffaa00':'#273247';ctx.beginPath();ctx.arc(node.x,node.y,i===this.pathIndex?23:18,0,Math.PI*2);ctx.fill();ctx.fillStyle=i===this.pathIndex?'#0a0e1a':'#d0d8e8';ctx.fillText(String(i+1),node.x,node.y+4);},this);
+  if(this.variant==='split'){ctx.strokeStyle='#384255';ctx.setLineDash([3,5]);ctx.beginPath();ctx.moveTo(this.x,this.y);ctx.lineTo(this.x+35,this.y+55);ctx.stroke();ctx.setLineDash([]);}
+  ctx.restore();
+};
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
