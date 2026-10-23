@@ -961,6 +961,15 @@
     #game-over-screen #final-stats { grid-template-columns: repeat(4, 1fr); }
   }
 
+
+  .device-help { font-size: 0.8rem; line-height: 1.65; color: var(--dim); margin: 10px 0; }
+  .device-panel { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; }
+  .device-panel h3 { font-size: 0.9rem; color: var(--cyan); line-height: 1.5; }
+  .device-panel label { display: block; font-size: 0.8rem; line-height: 1.6; margin: 12px 0 6px; }
+  .device-panel button { width: 100%; min-height: 44px; font-size: 0.85rem; padding: 10px; }
+  #device-code-input { width: 100%; padding: 12px 8px; font-family: inherit; font-size: 16px; text-transform: uppercase; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; user-select: text; }
+  #device-code { display: block; margin: 16px 0 12px; font-size: clamp(16px, 4.7vw, 24px); font-weight: bold; color: var(--green); text-align: center; letter-spacing: 1px; user-select: text; -webkit-user-select: text; }
+  .device-message { font-size: 0.8rem; line-height: 1.6; margin-top: 10px; overflow-wrap: anywhere; color: var(--yellow); }
 </style>
 </head>
 <body>
@@ -1036,7 +1045,9 @@
       <button id="title-lb-btn" type="button">Leaderboard</button>
       <button id="title-ach-btn" type="button" class="ach-btn">Achievements</button>
       <button id="title-player-btn" type="button">Choose player name</button>
+      <button id="title-devices-btn" type="button">Connect devices</button>
     </div>
+    <p id="device-connected-status" class="device-help" role="status"></p>
   </div>
 
   <!-- ===== GAME SCREEN ===== -->
@@ -1157,11 +1168,39 @@
       <div class="name-input-buttons">
         <button id="name-submit-btn" type="button">Continue</button>
         <button id="name-skip-btn" type="button" class="secondary">Play offline</button>
+        <button id="name-connect-btn" type="button" class="secondary">Use an existing player</button>
       </div>
       <div class="lb-import-msg" id="name-input-msg"></div>
     </div>
   </div>
 
+  <div id="device-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="device-title">
+    <div class="modal-content">
+      <button class="modal-close" type="button" aria-label="Close">&times;</button>
+      <h2 id="device-title">Connect devices</h2>
+      <p class="device-help">Use the same player, personal best and achievements on your other devices.</p>
+      <section class="device-panel">
+        <h3>On the device with your player</h3>
+        <p id="device-source-label" class="device-help"></p>
+        <button id="device-create-btn" type="button">Create a code</button>
+        <div id="device-code-wrap" class="hidden">
+          <output id="device-code" aria-live="polite"></output>
+          <button id="device-copy-btn" type="button">Copy code</button>
+          <p id="device-expiry" class="device-help" role="status"></p>
+        </div>
+        <p id="device-create-msg" class="device-message" role="status"></p>
+      </section>
+      <section class="device-panel">
+        <h3>On your other device</h3>
+        <label for="device-code-input">Enter the code from your player’s device</label>
+        <input id="device-code-input" type="text" maxlength="20" placeholder="ABCD-EFGH-JKLM" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <p id="device-switch-note" class="device-help"></p>
+        <button id="device-claim-btn" type="button">Connect player</button>
+        <p id="device-claim-msg" class="device-message" role="status"></p>
+      </section>
+      <p class="device-help">Codes expire after 10 minutes and connect one device. Only share a code with your own devices.</p>
+    </div>
+  </div>
 </div>
 
 <div id="footer">Made for <b>Henry</b> &middot; Computational Chemistry Edition &middot; Ni <b>28</b></div>
@@ -1311,7 +1350,8 @@ var tsSpawnTimer = 0, tsSpawnInterval = TS_SPAWN_FIRST, tsStabilized = 0;
 var canvas, ctx;
 
 try {
-  highScore = parseInt(localStorage.getItem('henrysNickelQuestHS') || '0', 10) || 0;
+  var savedPlayer = loadIdentity();
+  highScore = savedPlayer && savedPlayer.linkedState ? savedPlayer.linkedState.highScore : (parseInt(localStorage.getItem('henrysNickelQuestHS') || '0', 10) || 0);
 } catch(e) { highScore = 0; }
 
 /* Shared boards are served by the hosted API. No shared credentials belong here. */
@@ -1322,6 +1362,9 @@ var onlineLeaderboardCache = null;
 var identity = loadIdentity();
 var syncChain = Promise.resolve();
 var startAfterName = false;
+var connectingDevice = false;
+var connectionKey = null;
+var deviceCodeExpiresAt = 0;
 function lbReadEnabled() { return true; }
 function lbWriteEnabled() { return true; }
 
@@ -1381,6 +1424,8 @@ function mergeScores(scores, entry) {
 /* ----- Local persistence (offline mode + fallback) ----- */
 function getLocalScores() {
   try {
+    var savedPlayer = loadIdentity();
+    if (savedPlayer && savedPlayer.linkedState) return savedPlayer.linkedState.scores || [];
     var arr = JSON.parse(localStorage.getItem('henrysNickelQuestLB') || '[]');
     return Array.isArray(arr) ? arr : [];
   } catch(e) { return []; }
@@ -1388,18 +1433,22 @@ function getLocalScores() {
 
 function saveLocalScore(entry) {
   var scores = mergeScores(getLocalScores(), entry);
+  if (identity && identity.linkedState) { identity.linkedState.scores = scores; persistIdentity(); }
   try { localStorage.setItem('henrysNickelQuestLB', JSON.stringify(scores)); } catch(e) {}
   return scores;
 }
 
 function loadLocalAchievements() {
   try {
+    var savedPlayer = loadIdentity();
+    if (savedPlayer && savedPlayer.linkedState) return savedPlayer.linkedState.unlocks || {};
     var obj = JSON.parse(localStorage.getItem('henrysNickelQuestAch') || '{}');
     return (obj && typeof obj === 'object') ? obj : {};
   } catch(e) { return {}; }
 }
 
 function saveLocalAchievements() {
+  if (identity && identity.linkedState) persistIdentity();
   try { localStorage.setItem('henrysNickelQuestAch', JSON.stringify(unlockedAchievements)); } catch(e) {}
 }
 
@@ -1424,6 +1473,10 @@ function loadIdentity() {
   } catch(e) { return null; }
 }
 function persistIdentity() {
+  if (identity && identity.linkedState) {
+    identity.linkedState.unlocks = unlockedAchievements;
+    identity.linkedState.highScore = highScore;
+  }
   try { localStorage.setItem('henrysOnlineIdentity', JSON.stringify(identity)); } catch(e) {}
 }
 function api(path, body) {
@@ -1446,11 +1499,14 @@ function fetchOnlineLeaderboard() {
   }).catch(function() { return null; });
 }
 function syncProfile() {
+  if (connectingDevice) return Promise.resolve({ok:false, reason:'Connecting another player'});
   if (!identity) return Promise.resolve({ok:false, reason:'Enter your name first'});
   syncChain = syncChain.catch(function() {}).then(function() {
     var sent = JSON.parse(JSON.stringify(identity));
-    return api('/api/sync', { key: sent.key, name: sent.name, best: sent.best || null, unlocks: unlockedAchievements }).then(function(data) {
+    return api('/api/sync', { key: sent.key, name: sent.name, best: sent.best || null, unlocks: unlockedAchievements, rename: !!sent.renameRequested }).then(function(data) {
+      if (!identity || identity.key !== sent.key) return {ok:false,reason:'Player changed'};
       identity.name = data.name;
+      delete identity.renameRequested;
       identity.registered = true;
       document.getElementById('title-player-btn').textContent = 'Player: ' + data.name;
       saveLastPlayerName(data.name);
@@ -1603,6 +1659,96 @@ function copyShareUrl() {
 }
 function fallbackCopy(input) { input.select(); try { document.execCommand('copy'); } catch(e) {} }
 
+
+function randomDeviceKey() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(32))).map(function(b) { return b.toString(16).padStart(2,'0'); }).join('');
+}
+function openDeviceConnection() {
+  closeModalEl(document.getElementById('name-input-modal'));
+  document.getElementById('device-source-label').textContent = identity && identity.registered ? 'Current player: ' + identity.name : 'First choose a name on the device that has your player.';
+  document.getElementById('device-create-btn').disabled = !(identity && identity.registered);
+  document.getElementById('device-switch-note').textContent = identity ? 'Connecting switches this browser from ' + identity.name + ' to the other player. Different players’ progress is kept separate.' : 'Your player and progress will be remembered in this browser.';
+  document.getElementById('device-claim-msg').textContent = '';
+  openModal('device-modal');
+}
+function updateDeviceExpiry() {
+  if (!deviceCodeExpiresAt) return;
+  var seconds=Math.max(0,Math.ceil((deviceCodeExpiresAt-Date.now())/1000));
+  document.getElementById('device-expiry').textContent = seconds ? 'Expires in ' + Math.floor(seconds/60) + ':' + String(seconds%60).padStart(2,'0') : 'Expired. Create a new code.';
+  document.getElementById('device-copy-btn').disabled = !seconds;
+}
+async function createDeviceCode() {
+  if (!identity || !identity.registered) return;
+  var button=document.getElementById('device-create-btn');
+  var msg=document.getElementById('device-create-msg');
+  button.disabled=true; document.getElementById('device-claim-btn').disabled=true; msg.textContent='Creating a code…';
+  try {
+    var result=await syncProfile();
+    if (!result.ok) throw new Error(result.reason);
+    var data=await api('/api/device/create',{key:identity.key});
+    document.getElementById('device-code').textContent=data.code;
+    document.getElementById('device-code-wrap').classList.remove('hidden');
+    deviceCodeExpiresAt=data.expiresAt;
+    updateDeviceExpiry();
+    msg.textContent='Enter this code on the other device to connect ' + data.name + '.';
+  } catch(error) { msg.textContent=error.message; }
+  finally { button.disabled=false; document.getElementById('device-claim-btn').disabled=false; }
+}
+async function claimDeviceCode() {
+  var button=document.getElementById('device-claim-btn');
+  if (button.disabled) return;
+  var code=document.getElementById('device-code-input').value.toUpperCase().replace(/[\s-]/g,'');
+  var msg=document.getElementById('device-claim-msg');
+  if (!/^[2-9A-HJ-NP-Z]{12}$/.test(code)) { msg.textContent='Enter the 12-character code from your other device.'; return; }
+  button.disabled=true; document.getElementById('device-create-btn').disabled=true; connectingDevice=true; msg.textContent='Connecting your player…';
+  if (!connectionKey) connectionKey=randomDeviceKey();
+  try {
+    await syncChain.catch(function() {});
+    var data=await api('/api/device/claim',{key:connectionKey,code:code});
+    var nextIdentity={key:connectionKey,name:data.name,registered:true,best:data.best || null};
+    var nextScores=data.best ? [data.best] : [];
+    var nextHighScore=data.best ? data.best.score : 0;
+    var previous=identity ? {identity:identity,unlocks:unlockedAchievements,highScore:highScore,scores:getLocalScores()} : null;
+    if (previous) {
+      try {
+        var saved=JSON.parse(localStorage.getItem('henrysPreviousPlayers') || '[]');
+        saved.push(previous);
+        localStorage.setItem('henrysPreviousPlayers',JSON.stringify(saved.slice(-5)));
+      } catch(error) {}
+    }
+    nextIdentity.linkedState={unlocks:data.unlocks || {},scores:nextScores,highScore:nextHighScore};
+    try { localStorage.setItem('henrysOnlineIdentity',JSON.stringify(nextIdentity)); }
+    catch(error) { throw new Error('This browser could not remember your player. Allow browser storage, then try again with this code.'); }
+    try {
+      localStorage.setItem('henrysNickelQuestAch',JSON.stringify(data.unlocks || {}));
+      localStorage.setItem('henrysNickelQuestLB',JSON.stringify(nextScores));
+      localStorage.setItem('henrysNickelQuestHS',String(nextHighScore));
+    } catch(error) {}
+    identity=nextIdentity;
+    unlockedAchievements=data.unlocks || {};
+    highScore=nextHighScore;
+    connectionKey=null;
+    deviceCodeExpiresAt=0;
+    document.getElementById('device-code-wrap').classList.add('hidden');
+    document.getElementById('device-create-msg').textContent='';
+    saveLastPlayerName(data.name);
+    pendingSubmitScore=0; startAfterName=false;
+    onlineLeaderboardCache=null;
+    document.getElementById('title-player-btn').textContent='Player: '+identity.name;
+    closeModalEl(document.getElementById('device-modal'));
+    document.getElementById('device-code-input').value='';
+    returnToMainMenu();
+    document.getElementById('device-connected-status').textContent='Connected as '+identity.name+'. Your personal best and achievements are ready.';
+  } catch(error) { msg.textContent=error.message; }
+  finally { button.disabled=false; connectingDevice=false; document.getElementById('device-create-btn').disabled=!(identity && identity.registered); }
+}
+async function copyDeviceCode() {
+  var text=document.getElementById('device-code').textContent;
+  var msg=document.getElementById('device-create-msg');
+  try { await navigator.clipboard.writeText(text); msg.textContent='Code copied. Enter it on your other device.'; }
+  catch(error) { msg.textContent='Select and copy the code above, or type it on your other device.'; }
+}
+
 /* ----- Game-over submit flow ----- */
 function maybePromptSubmit() {
   if (score <= 0) return;
@@ -1633,6 +1779,7 @@ function submitPendingScore() {
     identity = {name:name, key:Array.from(bytes).map(function(v) { return v.toString(16).padStart(2,'0'); }).join('')};
   }
   identity.name = name;
+  identity.renameRequested = true;
   persistIdentity();
   saveLastPlayerName(name);
   msg.textContent = 'Joining the online boards…';
@@ -2646,6 +2793,13 @@ function init() {
   document.getElementById('main-menu-btn').addEventListener('click', returnToMainMenu);
   document.getElementById('dft-btn').addEventListener('click', runDFT);
 
+  document.getElementById('title-devices-btn').addEventListener('click',openDeviceConnection);
+  document.getElementById('name-connect-btn').addEventListener('click',openDeviceConnection);
+  document.getElementById('device-create-btn').addEventListener('click',createDeviceCode);
+  document.getElementById('device-claim-btn').addEventListener('click',claimDeviceCode);
+  document.getElementById('device-copy-btn').addEventListener('click',copyDeviceCode);
+  document.getElementById('device-code-input').addEventListener('keydown',function(e) { if (e.key==='Enter') claimDeviceCode(); });
+  setInterval(updateDeviceExpiry,1000);
   document.getElementById('title-player-btn').textContent = identity ? 'Player: ' + identity.name : 'Choose player name';
   document.getElementById('title-player-btn').addEventListener('click', function() {
     startAfterName = false;
